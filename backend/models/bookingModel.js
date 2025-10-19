@@ -39,8 +39,46 @@ const bookingSchema = new mongoose.Schema({
   },
   paymentStatus: {
     type: String,
-    enum: ['pending', 'paid', 'refunded'],
+    enum: ['pending', 'paid', 'refunded', 'failed'],
     default: 'pending'
+  },
+  paymentMethod: {
+    type: String,
+    enum: ['stripe', 'telebirr'],
+    default: 'telebirr'
+  },
+  paymentDetails: {
+    transactionId: {
+      type: String,
+      default: ''
+    },
+    paymentProvider: {
+      type: String,
+      enum: ['stripe', 'telebirr'],
+      default: 'telebirr'
+    },
+    providerTransactionId: {
+      type: String,
+      default: ''
+    },
+    paymentUrl: {
+      type: String,
+      default: ''
+    },
+    qrCode: {
+      type: String,
+      default: ''
+    },
+    paidAt: {
+      type: Date
+    },
+    refundedAt: {
+      type: Date
+    },
+    refundReason: {
+      type: String,
+      default: ''
+    }
   },
   message: {
     type: String,

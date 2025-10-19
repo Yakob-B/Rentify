@@ -88,4 +88,16 @@ export const upsertReview = (listingId, review) => api.post(`/reviews/listing/${
 // Payments API
 export const createCheckoutSession = (bookingId) => api.post('/payments/checkout', { bookingId })
 
+// Telebirr Payments API
+export const initiateTelebirrPayment = (bookingId) => api.post('/payments/telebirr/initiate', { bookingId })
+export const queryTelebirrPaymentStatus = (bookingId) => api.get(`/payments/telebirr/status/${bookingId}`)
+export const refundTelebirrPayment = (bookingId, reason) => api.post('/payments/telebirr/refund', { bookingId, reason })
+
+// Admin Invitation API
+export const createAdminInvitation = (invitationData) => api.post('/admin/invitations', invitationData)
+export const getAdminInvitations = () => api.get('/admin/invitations')
+export const revokeAdminInvitation = (invitationId) => api.delete(`/admin/invitations/${invitationId}`)
+export const registerAdmin = (adminData) => api.post('/admin/register-admin', adminData)
+export const validateInvitationToken = (token) => api.get(`/admin/validate-invitation/${token}`)
+
 export default api

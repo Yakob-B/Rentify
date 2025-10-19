@@ -5,16 +5,21 @@ require('dotenv').config();
 
 const app = express();
 const { webhook } = require('./controllers/paymentController');
+const { handleTelebirrWebhook } = require('./controllers/telebirrController');
 
 // Middleware
 app.use(cors());
-// Stripe webhook needs raw body; handle it before express.json and before other routes
+
+// Webhook routes need raw body; handle them before express.json
 app.post('/api/payments/webhook', express.raw({ type: 'application/json' }), webhook);
+app.post('/api/payments/telebirr/webhook', express.raw({ type: 'application/json' }), handleTelebirrWebhook);
+
 // For all other routes use JSON parser
 app.use(express.json());
 
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/categories', require('./routes/categoryRoutes'));
 app.use('/api/listings', require('./routes/listingRoutes'));
 app.use('/api/bookings', require('./routes/bookingRoutes'));

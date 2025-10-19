@@ -10,6 +10,7 @@ import Footer from './components/Footer'
 import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
+import AdminRegisterPage from './pages/AdminRegisterPage'
 import DashboardPage from './pages/DashboardPage'
 import ListingForm from './pages/ListingForm'
 import BookingPage from './pages/BookingPage'
@@ -45,6 +46,7 @@ function App() {
             <Route path="/listings/:id" element={<ListingDetails />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/admin/register/:token" element={<AdminRegisterPage />} />
             <Route
               path="/dashboard"
               element={

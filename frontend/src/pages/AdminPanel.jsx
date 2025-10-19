@@ -11,7 +11,7 @@ import {
   CheckCircleIcon,
   XCircleIcon
 } from '@heroicons/react/24/outline'
-import { getAllBookings } from '../utils/api'
+import { getAllBookings, createAdminInvitation, getAdminInvitations, revokeAdminInvitation } from '../utils/api'
 
 const AdminPanel = () => {
   const [activeTab, setActiveTab] = useState('overview')
@@ -25,6 +25,19 @@ const AdminPanel = () => {
     activeBookings: 0,
     completedBookings: 0
   })
+
+  // Admin invitations state
+  const [invitations, setInvitations] = useState([])
+  const [loadingInvites, setLoadingInvites] = useState(true)
+  const [invitationForm, setInvitationForm] = useState({ name: '', email: '' })
+  const [savingInvitation, setSavingInvitation] = useState(false)
+
+  // Categories state
+  const [categories, setCategories] = useState([])
+  const [loadingCats, setLoadingCats] = useState(true)
+  const [categoryForm, setCategoryForm] = useState({ name: '', description: '', icon: '', image: '' })
+  const [editingId, setEditingId] = useState(null)
+  const [savingCategory, setSavingCategory] = useState(false)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -52,10 +65,123 @@ const AdminPanel = () => {
     fetchData()
   }, [])
 
+  // Load admin invitations
+  useEffect(() => {
+    const loadInvitations = async () => {
+      try {
+        const data = await getAdminInvitations()
+        setInvitations(data)
+      } catch (e) {
+        toast.error(getErrorMessage(e, 'Failed to load invitations'))
+      } finally {
+        setLoadingInvites(false)
+      }
+    }
+    loadInvitations()
+  }, [])
+
+  // Load categories
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const data = await getCategories()
+        setCategories(data)
+      } catch (e) {
+        toast.error(getErrorMessage(e, 'Failed to load categories'))
+      } finally {
+        setLoadingCats(false)
+      }
+    }
+    loadCategories()
+  }, [])
+
+  // Admin invitation functions
+  const handleInvitationSubmit = async (e) => {
+    e.preventDefault()
+    setSavingInvitation(true)
+    try {
+      const created = await createAdminInvitation(invitationForm)
+      setInvitations(prev => [created.invitation, ...prev])
+      toast.success('Admin invitation sent successfully')
+      setInvitationForm({ name: '', email: '' })
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Failed to send invitation'))
+    } finally {
+      setSavingInvitation(false)
+    }
+  }
+
+  const handleRevokeInvitation = async (id) => {
+    if (!window.confirm('Revoke this invitation?')) return
+    try {
+      await revokeAdminInvitation(id)
+      setInvitations(prev => prev.map(inv => 
+        inv._id === id ? { ...inv, status: 'revoked' } : inv
+      ))
+      toast.success('Invitation revoked')
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Failed to revoke invitation'))
+    }
+  }
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'pending': return 'bg-yellow-100 text-yellow-800'
+      case 'used': return 'bg-green-100 text-green-800'
+      case 'expired': return 'bg-red-100 text-red-800'
+      case 'revoked': return 'bg-gray-100 text-gray-800'
+      default: return 'bg-gray-100 text-gray-800'
+    }
+  }
+
+  // Category functions
+  const resetCategoryForm = () => {
+    setCategoryForm({ name: '', description: '', icon: '', image: '' })
+    setEditingId(null)
+  }
+
+  const handleCategorySubmit = async (e) => {
+    e.preventDefault()
+    setSavingCategory(true)
+    try {
+      if (editingId) {
+        const updated = await updateCategory(editingId, categoryForm)
+        setCategories(prev => prev.map(c => (c._id === editingId ? updated : c)))
+        toast.success('Category updated')
+      } else {
+        const created = await createCategory(categoryForm)
+        setCategories(prev => [created, ...prev])
+        toast.success('Category created')
+      }
+      resetCategoryForm()
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Save failed'))
+    } finally {
+      setSavingCategory(false)
+    }
+  }
+
+  const handleCategoryEdit = (cat) => {
+    setEditingId(cat._id)
+    setCategoryForm({ name: cat.name, description: cat.description, icon: cat.icon || '', image: cat.image || '' })
+  }
+
+  const handleCategoryDelete = async (id) => {
+    if (!window.confirm('Delete this category?')) return
+    try {
+      await deleteCategory(id)
+      setCategories(prev => prev.filter(c => c._id !== id))
+      toast.success('Category deleted')
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Delete failed'))
+    }
+  }
+
   const tabs = [
     { id: 'overview', name: 'Overview', icon: ChartBarIcon },
     { id: 'bookings', name: 'Bookings', icon: CalendarIcon },
     { id: 'users', name: 'Users', icon: UsersIcon },
+    { id: 'invitations', name: 'Admin Invitations', icon: UsersIcon },
     { id: 'categories', name: 'Categories', icon: EyeIcon },
   ]
 
@@ -321,69 +447,110 @@ const AdminPanel = () => {
     </div>
   )
 
+  const renderAdminInvitations = () => {
+    return (
+      <div className="space-y-6">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+          <div className="p-6 border-b border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900">Send Admin Invitation</h3>
+          </div>
+          <div className="p-6">
+            <form onSubmit={handleInvitationSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <input
+                value={invitationForm.name}
+                onChange={(e) => setInvitationForm({ ...invitationForm, name: e.target.value })}
+                placeholder="Full Name"
+                required
+                className="input-field"
+              />
+              <input
+                value={invitationForm.email}
+                onChange={(e) => setInvitationForm({ ...invitationForm, email: e.target.value })}
+                placeholder="Email Address"
+                type="email"
+                required
+                className="input-field"
+              />
+              <button 
+                type="submit" 
+                disabled={savingInvitation} 
+                className="btn-primary whitespace-nowrap disabled:opacity-50"
+              >
+                {savingInvitation ? 'Sending...' : 'Send Invitation'}
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+          <div className="p-6 border-b border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900">Admin Invitations</h3>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Invited By</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expires</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {loadingInvites ? (
+                  <tr>
+                    <td colSpan="6" className="px-6 py-4">Loading...</td>
+                  </tr>
+                ) : invitations.length ? (
+                  invitations.map((inv) => (
+                    <tr key={inv._id}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{inv.name}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{inv.email}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(inv.status)}`}>
+                          {inv.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{inv.invitedBy?.name}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                        {new Date(inv.expiresAt).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        {inv.status === 'pending' && (
+                          <button 
+                            onClick={() => handleRevokeInvitation(inv._id)} 
+                            className="text-red-600 hover:text-red-900"
+                          >
+                            Revoke
+                          </button>
+                        )}
+                        {inv.status === 'pending' && (
+                          <div className="mt-1">
+                            <p className="text-xs text-gray-500">Invitation Link:</p>
+                            <p className="text-xs font-mono bg-gray-100 p-1 rounded">
+                              {window.location.origin}/admin/register/{inv.token}
+                            </p>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="6" className="px-6 py-4 text-center text-gray-500">No invitations</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   const renderCategories = () => {
-    const [categories, setCategories] = useState([])
-    const [loadingCats, setLoadingCats] = useState(true)
-    const [form, setForm] = useState({ name: '', description: '', icon: '', image: '' })
-    const [editingId, setEditingId] = useState(null)
-    const [saving, setSaving] = useState(false)
-
-    useEffect(() => {
-      const load = async () => {
-        try {
-          const data = await getCategories()
-          setCategories(data)
-        } catch (e) {
-          toast.error(getErrorMessage(e, 'Failed to load categories'))
-        } finally {
-          setLoadingCats(false)
-        }
-      }
-      load()
-    }, [])
-
-    const resetForm = () => {
-      setForm({ name: '', description: '', icon: '', image: '' })
-      setEditingId(null)
-    }
-
-    const submit = async (e) => {
-      e.preventDefault()
-      setSaving(true)
-      try {
-        if (editingId) {
-          const updated = await updateCategory(editingId, form)
-          setCategories(prev => prev.map(c => (c._id === editingId ? updated : c)))
-          toast.success('Category updated')
-        } else {
-          const created = await createCategory(form)
-          setCategories(prev => [created, ...prev])
-          toast.success('Category created')
-        }
-        resetForm()
-      } catch (err) {
-        toast.error(getErrorMessage(err, 'Save failed'))
-      } finally {
-        setSaving(false)
-      }
-    }
-
-    const onEdit = (cat) => {
-      setEditingId(cat._id)
-      setForm({ name: cat.name, description: cat.description, icon: cat.icon || '', image: cat.image || '' })
-    }
-
-    const onDelete = async (id) => {
-      if (!window.confirm('Delete this category?')) return
-      try {
-        await deleteCategory(id)
-        setCategories(prev => prev.filter(c => c._id !== id))
-        toast.success('Category deleted')
-      } catch (err) {
-        toast.error(getErrorMessage(err, 'Delete failed'))
-      }
-    }
-
     return (
       <div className="space-y-6">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200">
@@ -391,39 +558,39 @@ const AdminPanel = () => {
             <h3 className="text-lg font-semibold text-gray-900">Categories</h3>
           </div>
           <div className="p-6">
-            <form onSubmit={submit} className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <form onSubmit={handleCategorySubmit} className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
               <input
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                value={categoryForm.name}
+                onChange={(e) => setCategoryForm({ ...categoryForm, name: e.target.value })}
                 placeholder="Name"
                 required
                 className="input-field"
               />
               <input
-                value={form.description}
-                onChange={(e) => setForm({ ...form, description: e.target.value })}
+                value={categoryForm.description}
+                onChange={(e) => setCategoryForm({ ...categoryForm, description: e.target.value })}
                 placeholder="Description"
                 required
                 className="input-field"
               />
               <input
-                value={form.icon}
-                onChange={(e) => setForm({ ...form, icon: e.target.value })}
+                value={categoryForm.icon}
+                onChange={(e) => setCategoryForm({ ...categoryForm, icon: e.target.value })}
                 placeholder="Icon (emoji or class)"
                 className="input-field"
               />
               <div className="flex space-x-2">
                 <input
-                  value={form.image}
-                  onChange={(e) => setForm({ ...form, image: e.target.value })}
+                  value={categoryForm.image}
+                  onChange={(e) => setCategoryForm({ ...categoryForm, image: e.target.value })}
                   placeholder="Image URL"
                   className="input-field flex-1"
                 />
-                <button type="submit" disabled={saving} className="btn-primary whitespace-nowrap disabled:opacity-50">
-                  {saving ? (editingId ? 'Updating...' : 'Creating...') : (editingId ? 'Update' : 'Create')}
+                <button type="submit" disabled={savingCategory} className="btn-primary whitespace-nowrap disabled:opacity-50">
+                  {savingCategory ? (editingId ? 'Updating...' : 'Creating...') : (editingId ? 'Update' : 'Create')}
                 </button>
                 {editingId && (
-                  <button type="button" onClick={resetForm} className="btn-secondary whitespace-nowrap">Cancel</button>
+                  <button type="button" onClick={resetCategoryForm} className="btn-secondary whitespace-nowrap">Cancel</button>
                 )}
               </div>
             </form>
@@ -454,8 +621,8 @@ const AdminPanel = () => {
                           {cat.image ? <img src={cat.image} alt={cat.name} className="h-10 w-16 object-cover rounded" /> : '—'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-3">
-                          <button onClick={() => onEdit(cat)} className="text-primary-600 hover:text-primary-900">Edit</button>
-                          <button onClick={() => onDelete(cat._id)} className="text-red-600 hover:text-red-900">Delete</button>
+                          <button onClick={() => handleCategoryEdit(cat)} className="text-primary-600 hover:text-primary-900">Edit</button>
+                          <button onClick={() => handleCategoryDelete(cat._id)} className="text-red-600 hover:text-red-900">Delete</button>
                         </td>
                       </tr>
                     ))
@@ -509,6 +676,7 @@ const AdminPanel = () => {
           {activeTab === 'overview' && renderOverview()}
           {activeTab === 'bookings' && renderBookings()}
           {activeTab === 'users' && renderUsers()}
+          {activeTab === 'invitations' && renderAdminInvitations()}
           {activeTab === 'categories' && renderCategories()}
         </div>
       </div>
