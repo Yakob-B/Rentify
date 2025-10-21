@@ -54,7 +54,60 @@ const BookingPage = () => {
     const diffTime = Math.abs(end - start)
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
     
-    return diffDays * listing.price
+    // Calculate total based on price unit
+    switch (listing.priceUnit) {
+      case 'hour':
+        // For hourly rentals, calculate total hours
+        const diffHours = Math.ceil(diffTime / (1000 * 60 * 60))
+        return diffHours * listing.price
+        
+      case 'day':
+        // For daily rentals, calculate total days
+        return diffDays * listing.price
+        
+      case 'week':
+        // For weekly rentals, calculate total weeks (round up)
+        const diffWeeks = Math.ceil(diffDays / 7)
+        return diffWeeks * listing.price
+        
+      case 'month':
+        // For monthly rentals, calculate total months (round up)
+        const diffMonths = Math.ceil(diffDays / 30)
+        return diffMonths * listing.price
+        
+      default:
+        // Default to daily calculation
+        return diffDays * listing.price
+    }
+  }
+
+  const getDurationText = () => {
+    if (!startDate || !endDate || !listing) return ''
+    
+    const start = new Date(startDate)
+    const end = new Date(endDate)
+    const diffTime = Math.abs(end - start)
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    
+    switch (listing.priceUnit) {
+      case 'hour':
+        const diffHours = Math.ceil(diffTime / (1000 * 60 * 60))
+        return `${diffHours} hours`
+        
+      case 'day':
+        return `${diffDays} days`
+        
+      case 'week':
+        const diffWeeks = Math.ceil(diffDays / 7)
+        return `${diffWeeks} weeks`
+        
+      case 'month':
+        const diffMonths = Math.ceil(diffDays / 30)
+        return `${diffMonths} months`
+        
+      default:
+        return `${diffDays} days`
+    }
   }
 
   const onSubmit = async (data) => {
@@ -81,7 +134,7 @@ const BookingPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
       </div>
     )
@@ -89,10 +142,10 @@ const BookingPage = () => {
 
   if (!listing) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Listing not found</h2>
-          <p className="text-gray-600 mb-6">The listing you're looking for doesn't exist.</p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">Listing not found</h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">The listing you're looking for doesn't exist.</p>
           <button
             onClick={() => navigate('/')}
             className="btn-primary"
@@ -105,12 +158,12 @@ const BookingPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Listing Details */}
           <div className="space-y-6">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
               <div className="aspect-w-16 aspect-h-9">
                 <img
                   src={listing.images[0] || '/placeholder-image.jpg'}
@@ -122,11 +175,11 @@ const BookingPage = () => {
               <div className="p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <h1 className="text-2xl font-bold text-gray-900 mb-2">{listing.title}</h1>
-                    <p className="text-gray-600">{listing.description}</p>
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">{listing.title}</h1>
+                    <p className="text-gray-600 dark:text-gray-400">{listing.description}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-3xl font-bold text-primary-600">
+                    <p className="text-3xl font-bold text-primary-600 dark:text-primary-400">
                       ${listing.price}/{listing.priceUnit}
                     </p>
                   </div>
@@ -177,8 +230,8 @@ const BookingPage = () => {
 
           {/* Booking Form */}
           <div className="space-y-6">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-6">Request Booking</h2>
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6">Request Booking</h2>
               
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -239,26 +292,26 @@ const BookingPage = () => {
 
                 {/* Booking Summary */}
                 {startDate && endDate && (
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Booking Summary</h3>
+                  <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Booking Summary</h3>
                     
                     <div className="space-y-3">
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Duration:</span>
-                        <span className="font-medium">
-                          {Math.ceil((new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24))} days
+                        <span className="text-gray-600 dark:text-gray-400">Duration:</span>
+                        <span className="font-medium text-gray-900 dark:text-gray-100">
+                          {getDurationText()}
                         </span>
                       </div>
                       
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Price per {listing.priceUnit}:</span>
-                        <span className="font-medium">${listing.price}</span>
+                        <span className="text-gray-600 dark:text-gray-400">Price per {listing.priceUnit}:</span>
+                        <span className="font-medium text-gray-900 dark:text-gray-100">${listing.price}</span>
                       </div>
                       
-                      <div className="border-t border-gray-200 pt-3">
+                      <div className="border-t border-gray-200 dark:border-gray-600 pt-3">
                         <div className="flex justify-between text-lg font-semibold">
-                          <span>Total:</span>
-                          <span className="text-primary-600">${calculateTotal()}</span>
+                          <span className="text-gray-900 dark:text-gray-100">Total:</span>
+                          <span className="text-primary-600 dark:text-primary-400">${calculateTotal()}</span>
                         </div>
                       </div>
                     </div>
@@ -295,9 +348,9 @@ const BookingPage = () => {
             </div>
 
             {/* Important Notes */}
-            <div className="bg-blue-50 rounded-lg p-4">
-              <h3 className="text-lg font-semibold text-blue-900 mb-2">Important Notes</h3>
-              <ul className="text-sm text-blue-800 space-y-1">
+            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+              <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-2">Important Notes</h3>
+              <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
                 <li>• Your booking request will be sent to the owner for approval</li>
                 <li>• Payment will be processed once the owner approves your request</li>
                 <li>• You can cancel your booking up to 24 hours before the start date</li>
