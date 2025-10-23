@@ -20,6 +20,7 @@ app.use(express.json());
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
+app.use('/api/admin/users', require('./routes/userRoutes'));
 app.use('/api/categories', require('./routes/categoryRoutes'));
 app.use('/api/listings', require('./routes/listingRoutes'));
 app.use('/api/bookings', require('./routes/bookingRoutes'));

@@ -100,4 +100,18 @@ export const revokeAdminInvitation = (invitationId) => api.delete(`/admin/invita
 export const registerAdmin = (adminData) => api.post('/admin/register-admin', adminData)
 export const validateInvitationToken = (token) => api.get(`/admin/validate-invitation/${token}`)
 
+// User Management API (Admin only)
+export const getAllUsers = (params = {}) => {
+  const queryParams = new URLSearchParams(params).toString()
+  return api.get(`/admin/users${queryParams ? `?${queryParams}` : ''}`)
+}
+export const getUserById = (id) => api.get(`/admin/users/${id}`)
+export const updateUser = (id, userData) => api.put(`/admin/users/${id}`, userData)
+export const deleteUser = (id) => api.delete(`/admin/users/${id}`)
+export const suspendUser = (id, suspensionData) => api.put(`/admin/users/${id}/suspend`, suspensionData)
+export const getUserAnalytics = (params = {}) => {
+  const queryParams = new URLSearchParams(params).toString()
+  return api.get(`/admin/users/analytics${queryParams ? `?${queryParams}` : ''}`)
+}
+
 export default api
