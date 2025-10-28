@@ -34,9 +34,7 @@ const getAllUsers = async (req, res) => {
       .select('-password')
       .sort({ [sortBy]: sortOrder })
       .skip((page - 1) * limit)
-      .limit(limit)
-      .populate('listings', 'title status')
-      .populate('bookings', 'status totalAmount');
+      .limit(limit);
 
     // Calculate stats
     const stats = await User.aggregate([
@@ -83,9 +81,7 @@ const getAllUsers = async (req, res) => {
 const getUserById = async (req, res) => {
   try {
     const user = await User.findById(req.params.id)
-      .select('-password')
-      .populate('listings', 'title status price createdAt')
-      .populate('bookings', 'status totalAmount startDate endDate');
+      .select('-password');
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
