@@ -12,6 +12,7 @@ import {
   XCircleIcon
 } from '@heroicons/react/24/outline'
 import { getAllBookings, createAdminInvitation, getAdminInvitations, revokeAdminInvitation } from '../utils/api'
+import UserManagement from '../components/UserManagement'
 
 const AdminPanel = () => {
   const [activeTab, setActiveTab] = useState('overview')
@@ -435,16 +436,7 @@ const AdminPanel = () => {
   )
 
   const renderUsers = () => (
-    <div className="space-y-6">
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div className="p-6 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">User Management</h3>
-        </div>
-        <div className="p-6">
-          <p className="text-gray-600">User management features coming soon...</p>
-        </div>
-      </div>
-    </div>
+    <UserManagement />
   )
 
   const renderAdminInvitations = () => {

@@ -61,6 +61,16 @@ export const updateListing = (id, listingData) => api.put(`/listings/${id}`, lis
 export const deleteListing = (id) => api.delete(`/listings/${id}`)
 export const getUserListings = () => api.get('/listings/user/my-listings')
 
+// Nearby Listings API
+export const getNearbyListings = ({ lat, lng, distance, limit } = {}) => {
+  const params = new URLSearchParams()
+  if (lat !== undefined) params.append('lat', lat)
+  if (lng !== undefined) params.append('lng', lng)
+  if (distance !== undefined) params.append('distance', distance)
+  if (limit !== undefined) params.append('limit', limit)
+  return api.get(`/listings/nearby${params.toString() ? `?${params.toString()}` : ''}`)
+}
+
 // Uploads
 export const uploadListingImages = (files) => {
   const formData = new FormData()

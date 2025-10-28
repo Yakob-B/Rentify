@@ -21,6 +21,7 @@ import AdminPanel from './pages/AdminPanel'
 import NotFound from './pages/NotFound'
 import ListingsPage from './pages/ListingsPage'
 import ListingDetails from './pages/ListingDetails'
+import About from './pages/About'
 
 const ProtectedRoute = ({ children, roles }) => {
   const token = localStorage.getItem('token')
@@ -47,6 +48,7 @@ function App() {
             <PageTransition>
               <Routes>
               <Route path="/" element={<HomePage />} />
+              <Route path="/about" element={<About />} />
               <Route path="/listings" element={<ListingsPage />} />
               <Route path="/listings/:id" element={<ListingDetails />} />
               <Route path="/login" element={<LoginPage />} />

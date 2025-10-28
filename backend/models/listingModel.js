@@ -52,6 +52,26 @@ const listingSchema = new mongoose.Schema({
       lng: Number
     }
   },
+  // GeoJSON location for geospatial queries
+  geo: {
+    type: {
+      type: String,
+      enum: ['Point'],
+      default: 'Point'
+    },
+    coordinates: {
+      type: [Number], // [longitude, latitude]
+      validate: {
+        validator: function(v) {
+          return Array.isArray(v) && v.length === 2;
+        },
+        message: 'coordinates must be an array of [lng, lat]'
+      }
+    },
+    address: {
+      type: String
+    }
+  },
   images: [{
     type: String,
     required: true
@@ -98,5 +118,7 @@ const listingSchema = new mongoose.Schema({
 
 // Text index for search on title and description
 listingSchema.index({ title: 'text', description: 'text' });
+// 2dsphere index for geospatial queries
+listingSchema.index({ geo: '2dsphere' });
 
 module.exports = mongoose.model('Listing', listingSchema);

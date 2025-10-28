@@ -6,6 +6,7 @@ const {
   updateListing,
   deleteListing,
   getUserListings,
+  getNearbyListings,
   uploadListingImages
 } = require('../controllers/listingController');
 const { protect } = require('../middleware/authMiddleware');
@@ -14,6 +15,7 @@ const { uploadMultiple } = require('../utils/upload');
 const router = express.Router();
 
 router.get('/', getListings);
+router.get('/nearby', getNearbyListings);
 router.get('/user/my-listings', protect, getUserListings);
 router.get('/:id', getListingById);
 router.post('/', protect, createListing);

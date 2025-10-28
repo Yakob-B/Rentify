@@ -81,6 +81,45 @@ const getListings = async (req, res) => {
   }
 };
 
+// @desc    Get nearby listings by coordinates
+// @route   GET /api/listings/nearby
+// @access  Public
+const getNearbyListings = async (req, res) => {
+  try {
+    const { lat, lng, distance = 10, limit = 10 } = req.query;
+
+    if (lat === undefined || lng === undefined) {
+      return res.status(400).json({ message: 'Missing coordinates: lat and lng are required' });
+    }
+
+    const latitude = Number(lat);
+    const longitude = Number(lng);
+    const maxDistanceMeters = Number(distance) * 1000; // km -> meters
+
+    if (Number.isNaN(latitude) || Number.isNaN(longitude)) {
+      return res.status(400).json({ message: 'Invalid coordinates: lat and lng must be numbers' });
+    }
+
+    const listings = await Listing.find({
+      status: 'active',
+      geo: {
+        $near: {
+          $geometry: { type: 'Point', coordinates: [longitude, latitude] },
+          $maxDistance: maxDistanceMeters
+        }
+      }
+    })
+      .limit(Number(limit) || 10)
+      .populate('category', 'name icon')
+      .populate('owner', 'name email phone avatar');
+
+    res.json({ listings });
+  } catch (error) {
+    // MongoError code 2 for bad geo index/params, handle generically
+    res.status(500).json({ message: error.message || 'Failed to fetch nearby listings' });
+  }
+};
+
 // @desc    Get listing by ID
 // @route   GET /api/listings/:id
 // @access  Public
@@ -198,6 +237,7 @@ module.exports = {
   updateListing,
   deleteListing,
   getUserListings,
+  getNearbyListings,
   // Upload images controller expects multer to populate req.files
   uploadListingImages: async (req, res) => {
     try {

@@ -14,15 +14,17 @@ import CategoryFilter from '../components/CategoryFilter'
 import ListingCard from '../components/ListingCard'
 import PageTransition from '../components/PageTransition'
 import useScrollAnimation from '../hooks/useScrollAnimation'
-import { getCategories, getListings } from '../utils/api'
+import { getCategories, getListings, getNearbyListings } from '../utils/api'
 import toast from 'react-hot-toast'
 import { getErrorMessage } from '../utils/errors'
 
 const HomePage = () => {
   const [categories, setCategories] = useState([])
   const [listings, setListings] = useState([])
+  const [nearbyListings, setNearbyListings] = useState([])
   const [selectedCategory, setSelectedCategory] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [nearbyLoading, setNearbyLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [location, setLocation] = useState('')
   
@@ -50,6 +52,38 @@ const HomePage = () => {
     }
 
     fetchData()
+  }, [])
+
+  // Geolocation: fetch nearby listings
+  useEffect(() => {
+    const DEFAULT_COORDS = { lat: 9.005401, lng: 38.763611 } // Addis Ababa fallback
+
+    const fetchNearby = async (coords) => {
+      setNearbyLoading(true)
+      try {
+        const data = await getNearbyListings({ lat: coords.lat, lng: coords.lng, distance: 10, limit: 8 })
+        setNearbyListings(data.listings || [])
+      } catch (error) {
+        console.error('Error fetching nearby listings:', error)
+      } finally {
+        setNearbyLoading(false)
+      }
+    }
+
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude }
+          fetchNearby(coords)
+        },
+        () => {
+          fetchNearby(DEFAULT_COORDS)
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+      )
+    } else {
+      fetchNearby(DEFAULT_COORDS)
+    }
   }, [])
 
   const handleSearch = async () => {
@@ -291,6 +325,54 @@ const HomePage = () => {
           )}
         </div>
       </section>
+
+        {/* Nearby Listings */}
+        <section className="py-16 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center mb-8">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900 mb-2">Nearby Listings</h2>
+                <p className="text-lg text-gray-600">Based on your current location</p>
+              </div>
+              <Link 
+                to="/listings" 
+                className="text-primary-600 hover:text-primary-700 font-medium flex items-center space-x-2 hover-lift group"
+              >
+                <span>Explore More</span>
+                <ArrowRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
+              </Link>
+            </div>
+
+            {nearbyLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {[...Array(8)].map((_, i) => (
+                  <div key={i} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden animate-pulse">
+                    <div className="h-48 bg-gray-200"></div>
+                    <div className="p-4">
+                      <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                      <div className="h-3 bg-gray-200 rounded w-3/4 mb-4"></div>
+                      <div className="h-6 bg-gray-200 rounded w-1/2"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : nearbyListings.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {nearbyListings.map((listing) => (
+                  <ListingCard key={listing._id} listing={listing} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <div className="text-gray-400 mb-4">
+                  <MapPinIcon className="w-16 h-16 mx-auto" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">No nearby listings</h3>
+                <p className="text-gray-600">Try expanding your search distance or explore all listings.</p>
+              </div>
+            )}
+          </div>
+        </section>
 
         {/* CTA Section */}
         <section ref={ctaRef} className="bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800 text-white py-20 relative overflow-hidden">
