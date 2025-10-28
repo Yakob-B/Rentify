@@ -9,9 +9,10 @@ import {
   ChartBarIcon,
   ExclamationTriangleIcon,
   CheckCircleIcon,
-  XCircleIcon
+  XCircleIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline'
-import { getAllBookings, createAdminInvitation, getAdminInvitations, revokeAdminInvitation } from '../utils/api'
+import { getAllBookings, createAdminInvitation, getAdminInvitations, revokeAdminInvitation, updateBookingStatus } from '../utils/api'
 import UserManagement from '../components/UserManagement'
 
 const AdminPanel = () => {
@@ -39,6 +40,13 @@ const AdminPanel = () => {
   const [categoryForm, setCategoryForm] = useState({ name: '', description: '', icon: '', image: '' })
   const [editingId, setEditingId] = useState(null)
   const [savingCategory, setSavingCategory] = useState(false)
+
+  // Booking modals state
+  const [selectedBooking, setSelectedBooking] = useState(null)
+  const [showBookingModal, setShowBookingModal] = useState(false)
+  const [showRejectModal, setShowRejectModal] = useState(false)
+  const [rejectReason, setRejectReason] = useState('')
+  const [processingBooking, setProcessingBooking] = useState(false)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -175,6 +183,54 @@ const AdminPanel = () => {
       toast.success('Category deleted')
     } catch (err) {
       toast.error(getErrorMessage(err, 'Delete failed'))
+    }
+  }
+
+  // Booking action handlers
+  const handleViewBooking = (booking) => {
+    setSelectedBooking(booking)
+    setShowBookingModal(true)
+  }
+
+  const handleApproveBooking = async (bookingId) => {
+    if (!window.confirm('Approve this booking?')) return
+    setProcessingBooking(true)
+    try {
+      await updateBookingStatus(bookingId, { status: 'approved' })
+      const bookingsData = await getAllBookings()
+      setBookings(bookingsData.bookings || [])
+      toast.success('Booking approved successfully')
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Failed to approve booking'))
+    } finally {
+      setProcessingBooking(false)
+    }
+  }
+
+  const handleRejectBooking = (booking) => {
+    setSelectedBooking(booking)
+    setRejectReason('')
+    setShowRejectModal(true)
+  }
+
+  const handleRejectConfirm = async () => {
+    if (!selectedBooking) return
+    setProcessingBooking(true)
+    try {
+      await updateBookingStatus(selectedBooking._id, { 
+        status: 'rejected',
+        message: rejectReason 
+      })
+      const bookingsData = await getAllBookings()
+      setBookings(bookingsData.bookings || [])
+      toast.success('Booking rejected')
+      setShowRejectModal(false)
+      setSelectedBooking(null)
+      setRejectReason('')
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Failed to reject booking'))
+    } finally {
+      setProcessingBooking(false)
     }
   }
 
@@ -405,15 +461,26 @@ const AdminPanel = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button className="text-primary-600 hover:text-primary-900 mr-3">
+                      <button 
+                        onClick={() => handleViewBooking(booking)}
+                        className="text-primary-600 hover:text-primary-900 mr-3 transition-colors"
+                      >
                         View
                       </button>
                       {booking.status === 'pending' && (
                         <>
-                          <button className="text-green-600 hover:text-green-900 mr-3">
+                          <button 
+                            onClick={() => handleApproveBooking(booking._id)}
+                            disabled={processingBooking}
+                            className="text-green-600 hover:text-green-900 mr-3 transition-colors disabled:opacity-50"
+                          >
                             Approve
                           </button>
-                          <button className="text-red-600 hover:text-red-900">
+                          <button 
+                            onClick={() => handleRejectBooking(booking)}
+                            disabled={processingBooking}
+                            className="text-red-600 hover:text-red-900 transition-colors disabled:opacity-50"
+                          >
                             Reject
                           </button>
                         </>
@@ -632,6 +699,163 @@ const AdminPanel = () => {
     )
   }
 
+  // Booking View Modal
+  const renderBookingModal = () => {
+    if (!selectedBooking) return null
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-gray-900">Booking Details</h3>
+            <button
+              onClick={() => setShowBookingModal(false)}
+              className="text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <XMarkIcon className="w-6 h-6" />
+            </button>
+          </div>
+          
+          <div className="p-6 space-y-6">
+            {/* Listing Info */}
+            <div>
+              <h4 className="font-semibold text-gray-900 mb-2">Listing</h4>
+              <p className="text-gray-700">{selectedBooking.listing.title}</p>
+              {selectedBooking.listing.images?.[0] && (
+                <img 
+                  src={selectedBooking.listing.images[0]} 
+                  alt={selectedBooking.listing.title}
+                  className="mt-2 w-full h-48 object-cover rounded-lg"
+                />
+              )}
+            </div>
+
+            {/* Renter Info */}
+            <div>
+              <h4 className="font-semibold text-gray-900 mb-2">Renter</h4>
+              <p className="text-gray-700">{selectedBooking.renter.name}</p>
+              <p className="text-gray-600 text-sm">{selectedBooking.renter.email}</p>
+              {selectedBooking.renter.phone && (
+                <p className="text-gray-600 text-sm">{selectedBooking.renter.phone}</p>
+              )}
+            </div>
+
+            {/* Owner Info */}
+            <div>
+              <h4 className="font-semibold text-gray-900 mb-2">Owner</h4>
+              <p className="text-gray-700">{selectedBooking.owner.name}</p>
+              <p className="text-gray-600 text-sm">{selectedBooking.owner.email}</p>
+              {selectedBooking.owner.phone && (
+                <p className="text-gray-600 text-sm">{selectedBooking.owner.phone}</p>
+              )}
+            </div>
+
+            {/* Booking Details */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-1">Start Date</h4>
+                <p className="text-gray-700">{new Date(selectedBooking.startDate).toLocaleDateString()}</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-1">End Date</h4>
+                <p className="text-gray-700">{new Date(selectedBooking.endDate).toLocaleDateString()}</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-1">Total Days</h4>
+                <p className="text-gray-700">{selectedBooking.totalDays}</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-1">Total Amount</h4>
+                <p className="text-gray-700 font-semibold">${selectedBooking.totalAmount}</p>
+              </div>
+            </div>
+
+            {/* Status */}
+            <div>
+              <h4 className="font-semibold text-gray-900 mb-1">Status</h4>
+              <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${
+                selectedBooking.status === 'approved' 
+                  ? 'bg-green-100 text-green-800'
+                  : selectedBooking.status === 'pending'
+                  ? 'bg-yellow-100 text-yellow-800'
+                  : selectedBooking.status === 'rejected'
+                  ? 'bg-red-100 text-red-800'
+                  : 'bg-gray-100 text-gray-800'
+              }`}>
+                {selectedBooking.status}
+              </span>
+            </div>
+
+            {/* Renter Message */}
+            {selectedBooking.message && (
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-1">Renter Message</h4>
+                <p className="text-gray-700 bg-gray-50 p-3 rounded-lg">{selectedBooking.message}</p>
+              </div>
+            )}
+
+            {/* Owner Response */}
+            {selectedBooking.ownerResponse?.message && (
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-1">Owner Response</h4>
+                <p className="text-gray-700 bg-gray-50 p-3 rounded-lg">{selectedBooking.ownerResponse.message}</p>
+              </div>
+            )}
+          </div>
+
+          <div className="p-6 border-t border-gray-200 flex justify-end space-x-3">
+            <button
+              onClick={() => setShowBookingModal(false)}
+              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Reject Booking Modal
+  const renderRejectModal = () => (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+        <div className="p-6 border-b border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-900">Reject Booking</h3>
+        </div>
+        
+        <div className="p-6">
+          <p className="text-gray-600 mb-4">
+            Are you sure you want to reject this booking? You can provide a reason below.
+          </p>
+          <textarea
+            value={rejectReason}
+            onChange={(e) => setRejectReason(e.target.value)}
+            rows={4}
+            placeholder="Reason for rejection (optional)"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500"
+          />
+        </div>
+        
+        <div className="p-6 border-t border-gray-200 flex justify-end space-x-3">
+          <button
+            onClick={() => setShowRejectModal(false)}
+            disabled={processingBooking}
+            className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleRejectConfirm}
+            disabled={processingBooking}
+            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+          >
+            {processingBooking ? 'Rejecting...' : 'Reject Booking'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -672,6 +896,10 @@ const AdminPanel = () => {
           {activeTab === 'categories' && renderCategories()}
         </div>
       </div>
+
+      {/* Modals */}
+      {showBookingModal && renderBookingModal()}
+      {showRejectModal && renderRejectModal()}
     </div>
   )
 }
