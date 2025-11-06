@@ -5,6 +5,7 @@ import toast from 'react-hot-toast'
 import { getErrorMessage } from '../utils/errors'
 import ListingCard from '../components/ListingCard'
 import Skeleton from '../components/Skeleton'
+import Pagination from '../components/Pagination'
 import {
   MagnifyingGlassIcon,
   FunnelIcon,
@@ -378,27 +379,11 @@ const ListingsPage = () => {
         )}
 
         {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex justify-center mt-8 gap-2">
-            <button
-              disabled={page <= 1}
-              onClick={() => changePage(page - 1)}
-              className="btn-secondary disabled:opacity-50"
-            >
-              Previous
-            </button>
-            <div className="px-4 py-2 text-sm text-gray-700">
-              Page {page} of {totalPages}
-            </div>
-            <button
-              disabled={page >= totalPages}
-              onClick={() => changePage(page + 1)}
-              className="btn-secondary disabled:opacity-50"
-            >
-              Next
-            </button>
-          </div>
-        )}
+        <Pagination
+          currentPage={page}
+          totalPages={totalPages}
+          onPageChange={changePage}
+        />
       </div>
     </div>
   )

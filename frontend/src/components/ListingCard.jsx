@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { Link } from 'react-router-dom'
 import { 
   MapPinIcon, 
@@ -8,9 +8,9 @@ import {
 } from '@heroicons/react/24/outline'
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid'
 import FavoriteButton from './FavoriteButton'
+import LazyImage from './LazyImage'
 
 const ListingCard = ({ listing }) => {
-  const [imageLoaded, setImageLoaded] = useState(false)
 
   const formatPrice = (price, unit) => {
     return `$${price}/${unit}`
@@ -24,19 +24,14 @@ const ListingCard = ({ listing }) => {
     <div className="card-hover group relative overflow-hidden">
       <Link to={`/listings/${listing._id}`} className="block">
         <div className="relative overflow-hidden">
-          <div className="relative">
-            <img
-              src={(listing.images && listing.images[0]) || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300"%3E%3Crect fill="%23f3f4f6" width="400" height="300"/%3E%3Ctext fill="%239ca3af" font-family="system-ui, sans-serif" font-size="18" x="50%25" y="50%25" text-anchor="middle" dominant-baseline="middle"%3ENo Image%3C/text%3E%3C/svg%3E'}
+          <div className="relative h-48">
+            <LazyImage
+              src={listing.images && listing.images[0]}
               alt={listing.title}
-              className={`w-full h-48 object-cover transition-all duration-500 group-hover:scale-110 ${
-                imageLoaded ? 'opacity-100' : 'opacity-0'
-              }`}
-              onLoad={() => setImageLoaded(true)}
+              className="w-full h-full group-hover:scale-110 transition-transform duration-500"
+              placeholder="data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300"%3E%3Crect fill="%23f3f4f6" width="400" height="300"/%3E%3C/svg%3E"
             />
-            {!imageLoaded && (
-              <div className="absolute inset-0 bg-gray-200 animate-pulse"></div>
-            )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
             
             {/* Favorite button */}
             <div className="absolute top-3 right-3 z-10" onClick={(e) => e.stopPropagation()}>

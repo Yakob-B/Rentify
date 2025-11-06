@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { XMarkIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline'
+import LazyImage from './LazyImage'
 
 const ImageGallery = ({ images, title = 'Image Gallery' }) => {
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -61,10 +62,10 @@ const ImageGallery = ({ images, title = 'Image Gallery' }) => {
       <div className="space-y-4">
         {/* Main Image */}
         <div className="relative w-full h-96 rounded-lg overflow-hidden bg-gray-100 cursor-pointer group" onClick={() => openModal(0)}>
-          <img
+          <LazyImage
             src={images[0]}
             alt={`${title} - Main`}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            className="w-full h-full group-hover:scale-105 transition-transform duration-300"
           />
           {images.length > 1 && (
             <div className="absolute bottom-4 right-4 bg-black bg-opacity-60 text-white px-3 py-1 rounded-full text-sm">
@@ -82,10 +83,10 @@ const ImageGallery = ({ images, title = 'Image Gallery' }) => {
                 className="relative aspect-square rounded-lg overflow-hidden cursor-pointer group border-2 border-transparent hover:border-primary-500 transition-all"
                 onClick={() => openModal(index)}
               >
-                <img
+                <LazyImage
                   src={image}
                   alt={`${title} - ${index + 1}`}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                  className="w-full h-full group-hover:scale-110 transition-transform duration-300"
                 />
                 {index === 5 && images.length > 6 && (
                   <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
@@ -113,7 +114,7 @@ const ImageGallery = ({ images, title = 'Image Gallery' }) => {
 
             {/* Main Image */}
             <div className="relative w-full h-full flex items-center justify-center">
-              <img
+              <LazyImage
                 src={images[currentIndex]}
                 alt={`${title} - ${currentIndex + 1}`}
                 className="max-w-full max-h-full object-contain"
@@ -156,10 +157,10 @@ const ImageGallery = ({ images, title = 'Image Gallery' }) => {
                       index === currentIndex ? 'border-white' : 'border-transparent opacity-60 hover:opacity-100'
                     }`}
                   >
-                    <img
+                    <LazyImage
                       src={image}
                       alt={`Thumbnail ${index + 1}`}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full"
                     />
                   </button>
                 ))}

@@ -14,6 +14,8 @@ import CategoryFilter from '../components/CategoryFilter'
 import ListingCard from '../components/ListingCard'
 import PageTransition from '../components/PageTransition'
 import useScrollAnimation from '../hooks/useScrollAnimation'
+import SEO from '../components/SEO'
+import StructuredData from '../components/StructuredData'
 import { getCategories, getListings, getNearbyListings } from '../utils/api'
 import toast from 'react-hot-toast'
 import { getErrorMessage } from '../utils/errors'
@@ -123,8 +125,31 @@ const HomePage = () => {
     }
   }
 
+  // Structured data for homepage
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Rentify',
+    description: 'Universal Rent Service Platform',
+    url: window.location.origin,
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: `${window.location.origin}/listings?search={search_term_string}`
+      },
+      'query-input': 'required name=search_term_string'
+    }
+  }
+
   return (
     <PageTransition>
+      <SEO
+        title="Rentify - Universal Rent Service Platform"
+        description="Rentify is a universal rent service platform where you can rent or list any kind of item - homes, vehicles, tools, electronics, and more."
+        keywords="rent, rental, marketplace, items, property, vehicle, tools, electronics"
+      />
+      <StructuredData data={structuredData} />
       <div className="min-h-screen">
         {/* Hero Section */}
         <section ref={heroRef} className="relative overflow-hidden bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800 text-white">

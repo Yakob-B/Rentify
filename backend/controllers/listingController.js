@@ -1,6 +1,7 @@
 const Listing = require('../models/listingModel');
 const Category = require('../models/categoryModel');
 const { getPublicIdFromUrl } = require('../utils/upload');
+const { clearCache } = require('../middleware/cacheMiddleware');
 
 // @desc    Get all listings
 // @route   GET /api/listings
@@ -190,6 +191,9 @@ const createListing = async (req, res) => {
       .populate('category', 'name icon')
       .populate('owner', 'name email phone avatar');
 
+    // Clear listings cache
+    clearCache('/api/listings');
+
     res.status(201).json(populatedListing);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -218,6 +222,10 @@ const updateListing = async (req, res) => {
       { new: true }
     ).populate('category', 'name icon').populate('owner', 'name email phone avatar');
 
+    // Clear cache for listings and this specific listing
+    clearCache('/api/listings');
+    clearCache(`/api/listings/${req.params.id}`);
+
     res.json(updatedListing);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -241,6 +249,11 @@ const deleteListing = async (req, res) => {
     }
 
     await Listing.findByIdAndDelete(req.params.id);
+    
+    // Clear cache for listings and this specific listing
+    clearCache('/api/listings');
+    clearCache(`/api/listings/${req.params.id}`);
+
     res.json({ message: 'Listing deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });

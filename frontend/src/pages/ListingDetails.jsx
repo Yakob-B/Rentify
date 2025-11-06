@@ -6,6 +6,8 @@ import { getErrorMessage } from '../utils/errors'
 import Skeleton from '../components/Skeleton'
 import ImageGallery from '../components/ImageGallery'
 import FavoriteButton from '../components/FavoriteButton'
+import SEO from '../components/SEO'
+import StructuredData from '../components/StructuredData'
 import { MapPinIcon, StarIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline'
 
 const ListingDetails = () => {
@@ -119,8 +121,59 @@ const ListingDetails = () => {
     )
   }
 
+  // Generate structured data for SEO
+  const structuredData = listing ? {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: listing.title,
+    description: listing.description,
+    image: listing.images && listing.images.length > 0 ? listing.images : [],
+    offers: {
+      '@type': 'Offer',
+      price: listing.price,
+      priceCurrency: 'USD',
+      availability: listing.availability?.isAvailable 
+        ? 'https://schema.org/InStock' 
+        : 'https://schema.org/OutOfStock',
+      priceSpecification: {
+        '@type': 'UnitPriceSpecification',
+        price: listing.price,
+        priceCurrency: 'USD',
+        unitCode: listing.priceUnit
+      }
+    },
+    aggregateRating: listing.rating?.average ? {
+      '@type': 'AggregateRating',
+      ratingValue: listing.rating.average,
+      reviewCount: listing.rating.count || 0
+    } : undefined,
+    location: {
+      '@type': 'Place',
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: listing.location?.city,
+        addressRegion: listing.location?.state,
+        postalCode: listing.location?.zipCode,
+        streetAddress: listing.location?.address
+      }
+    }
+  } : null
+
   return (
     <div className="min-h-screen bg-gray-50">
+      {listing && (
+        <>
+          <SEO
+            title={`${listing.title} - Rentify`}
+            description={listing.description.substring(0, 160)}
+            image={listing.images && listing.images[0] ? listing.images[0] : '/og-image.jpg'}
+            type="product"
+            keywords={`${listing.title}, ${listing.category?.name || ''}, rent, rental`}
+            canonical={`${window.location.origin}/listings/${listing._id}`}
+          />
+          <StructuredData data={structuredData} />
+        </>
+      )}
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
           <div className="p-6 relative">
