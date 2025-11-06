@@ -66,27 +66,27 @@ const ListingCard = ({ listing }) => {
           </div>
         </div>
 
-        <div className="p-4 space-y-3">
+        <div className="p-4 space-y-3 bg-white dark:bg-black">
           <div className="flex justify-between items-start">
-            <h3 className="text-lg font-semibold text-gray-900 line-clamp-2 group-hover:text-primary-700 transition-colors duration-300">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white line-clamp-2 group-hover:text-primary-700 dark:group-hover:text-white transition-colors duration-300">
               {listing.title}
             </h3>
-            <span className="shrink-0 px-3 py-1 rounded-lg text-sm font-bold bg-primary-50 text-primary-700 group-hover:bg-primary-500 group-hover:text-white transition-all duration-300">
+            <span className="shrink-0 px-3 py-1 rounded-lg text-sm font-bold bg-primary-50 dark:bg-gray-900 text-primary-700 dark:text-white group-hover:bg-primary-500 dark:group-hover:bg-white dark:group-hover:text-black group-hover:text-white transition-all duration-300 border dark:border-gray-800">
               {formatPrice(listing.price, listing.priceUnit)}
             </span>
           </div>
           
-          <p className="text-gray-600 text-sm line-clamp-2 group-hover:text-gray-700 transition-colors duration-300">
+          <p className="text-gray-600 dark:text-gray-300 text-sm line-clamp-2 group-hover:text-gray-700 dark:group-hover:text-white transition-colors duration-300">
             {listing.description}
           </p>
           
-          <div className="flex items-center text-gray-500 text-sm group-hover:text-gray-700 transition-colors duration-300">
-            <MapPinIcon className="w-4 h-4 mr-2 text-primary-500" />
+          <div className="flex items-center text-gray-500 dark:text-gray-400 text-sm group-hover:text-gray-700 dark:group-hover:text-white transition-colors duration-300">
+            <MapPinIcon className="w-4 h-4 mr-2 text-primary-500 dark:text-white" />
             <span>{listing.location?.city || '—'}, {listing.location?.state || '—'}</span>
           </div>
           
-          <div className="flex items-center text-gray-500 text-xs group-hover:text-gray-600 transition-colors duration-300">
-            <CalendarIcon className="w-3 h-3 mr-2 text-primary-500" />
+          <div className="flex items-center text-gray-500 dark:text-gray-400 text-xs group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors duration-300">
+            <CalendarIcon className="w-3 h-3 mr-2 text-primary-500 dark:text-white" />
             <span>Available until {formatDate(listing.availability?.endDate)}</span>
           </div>
         </div>

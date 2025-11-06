@@ -46,8 +46,8 @@ const Navbar = () => {
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
       scrolled 
-        ? 'bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-200' 
-        : 'bg-white shadow-sm border-b border-gray-200'
+        ? 'bg-white/95 dark:bg-black/95 backdrop-blur-md shadow-lg border-b border-gray-200 dark:border-gray-800' 
+        : 'bg-white dark:bg-black shadow-sm border-b border-gray-200 dark:border-gray-800'
     }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
@@ -57,7 +57,7 @@ const Navbar = () => {
                 <span className="text-white font-bold text-lg">R</span>
                 <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full animate-ping opacity-75"></div>
               </div>
-              <span className="text-xl font-bold text-gray-900 group-hover:text-primary-600 transition-colors duration-300">
+              <span className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-white transition-colors duration-300">
                 Rentify
               </span>
             </Link>
@@ -69,8 +69,8 @@ const Navbar = () => {
               to="/" 
               className={({isActive}) => `px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 hover:scale-105 ${
                 isActive 
-                  ? 'text-primary-700 bg-primary-50 shadow-sm' 
-                  : 'text-gray-700 hover:text-primary-600 hover:bg-gray-50'
+                  ? 'text-primary-700 dark:text-white bg-primary-50 dark:bg-gray-900 shadow-sm' 
+                  : 'text-gray-700 dark:text-white hover:text-primary-600 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-900'
               }`}
             >
               Home
@@ -79,8 +79,8 @@ const Navbar = () => {
               to="/about" 
               className={({isActive}) => `px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 hover:scale-105 ${
                 isActive 
-                  ? 'text-primary-700 bg-primary-50 shadow-sm' 
-                  : 'text-gray-700 hover:text-primary-600 hover:bg-gray-50'
+                  ? 'text-primary-700 dark:text-white bg-primary-50 dark:bg-gray-900 shadow-sm' 
+                  : 'text-gray-700 dark:text-white hover:text-primary-600 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-900'
               }`}
             >
               About
@@ -89,8 +89,8 @@ const Navbar = () => {
               to="/listings" 
               className={({isActive}) => `px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 hover:scale-105 ${
                 isActive 
-                  ? 'text-primary-700 bg-primary-50 shadow-sm' 
-                  : 'text-gray-700 hover:text-primary-600 hover:bg-gray-50'
+                  ? 'text-primary-700 dark:text-white bg-primary-50 dark:bg-gray-900 shadow-sm' 
+                  : 'text-gray-700 dark:text-white hover:text-primary-600 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-900'
               }`}
             >
               Browse
@@ -114,29 +114,29 @@ const Navbar = () => {
                 </Link>
                 
                 <div className="relative group">
-                  <button className="flex items-center space-x-2 text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 hover:scale-105">
+                  <button className="flex items-center space-x-2 text-gray-700 dark:text-white hover:text-primary-600 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 hover:scale-105">
                     <UserCircleIcon className="w-6 h-6 group-hover:scale-110 transition-transform duration-300" />
                     <span>{user.name}</span>
                   </button>
                   
-                  <div className="absolute right-0 mt-2 w-48 bg-white/95 backdrop-blur-md rounded-xl shadow-xl py-2 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+                  <div className="absolute right-0 mt-2 w-48 bg-white/95 dark:bg-black/95 backdrop-blur-md rounded-xl shadow-xl py-2 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 border dark:border-gray-800">
                     <Link 
                       to="/dashboard" 
-                      className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-all duration-200 hover:translate-x-1"
+                      className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 dark:text-white hover:bg-primary-50 dark:hover:bg-gray-900 hover:text-primary-700 dark:hover:text-white transition-all duration-200 hover:translate-x-1"
                     >
                       <HomeIcon className="w-4 h-4" />
                       <span>Dashboard</span>
                     </Link>
                     <Link 
                       to="/messages" 
-                      className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-all duration-200 hover:translate-x-1"
+                      className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 dark:text-white hover:bg-primary-50 dark:hover:bg-gray-900 hover:text-primary-700 dark:hover:text-white transition-all duration-200 hover:translate-x-1"
                     >
                       <ChatBubbleLeftRightIcon className="w-4 h-4" />
                       <span>Messages</span>
                     </Link>
                     <Link 
                       to="/favorites" 
-                      className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-all duration-200 hover:translate-x-1"
+                      className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 dark:text-white hover:bg-primary-50 dark:hover:bg-gray-900 hover:text-primary-700 dark:hover:text-white transition-all duration-200 hover:translate-x-1"
                     >
                       <HeartIcon className="w-4 h-4" />
                       <span>Favorites</span>
@@ -144,7 +144,7 @@ const Navbar = () => {
                     {user.role === 'admin' && (
                       <Link 
                         to="/admin" 
-                        className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-all duration-200 hover:translate-x-1"
+                        className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 dark:text-white hover:bg-primary-50 dark:hover:bg-gray-900 hover:text-primary-700 dark:hover:text-white transition-all duration-200 hover:translate-x-1"
                       >
                         <Cog6ToothIcon className="w-4 h-4" />
                         <span>Admin Panel</span>
@@ -152,7 +152,7 @@ const Navbar = () => {
                     )}
                     <button 
                       onClick={handleLogout}
-                      className="flex items-center space-x-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-700 transition-all duration-200 hover:translate-x-1"
+                      className="flex items-center space-x-2 w-full px-4 py-2 text-sm text-gray-700 dark:text-white hover:bg-red-50 dark:hover:bg-gray-900 hover:text-red-700 dark:hover:text-red-400 transition-all duration-200 hover:translate-x-1"
                     >
                       <ArrowRightOnRectangleIcon className="w-4 h-4" />
                       <span>Logout</span>
@@ -164,7 +164,7 @@ const Navbar = () => {
               <div className="flex items-center space-x-4">
                 <Link 
                   to="/login" 
-                  className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 hover:scale-105"
+                  className="text-gray-700 dark:text-white hover:text-primary-600 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 hover:scale-105"
                 >
                   Login
                 </Link>

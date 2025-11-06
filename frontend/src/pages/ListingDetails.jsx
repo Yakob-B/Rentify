@@ -115,7 +115,7 @@ const ListingDetails = () => {
   if (!listing) {
     return (
       <div className="max-w-5xl mx-auto p-6 text-center">
-        <p className="text-gray-600">Listing not found.</p>
+        <p className="text-gray-600 dark:text-gray-300">Listing not found.</p>
         <Link to="/listings" className="btn-primary mt-4 inline-block">Back to listings</Link>
       </div>
     )
@@ -160,7 +160,7 @@ const ListingDetails = () => {
   } : null
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-black">
       {listing && (
         <>
           <SEO
@@ -175,7 +175,7 @@ const ListingDetails = () => {
         </>
       )}
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+        <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg overflow-hidden">
           <div className="p-6 relative">
             <div className="absolute top-6 right-6 z-10">
               <FavoriteButton listingId={listing._id} />
@@ -185,8 +185,8 @@ const ListingDetails = () => {
           <div className="p-6 pt-0">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">{listing.title}</h1>
-                <div className="mt-2 flex items-center gap-3 text-gray-600">
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{listing.title}</h1>
+                <div className="mt-2 flex items-center gap-3 text-gray-600 dark:text-gray-300">
                   <span className="inline-flex items-center gap-1">
                     <MapPinIcon className="w-4 h-4" />
                     {listing.location?.city}, {listing.location?.state}
@@ -198,7 +198,7 @@ const ListingDetails = () => {
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-3xl font-bold text-primary-600">
+                <div className="text-3xl font-bold text-primary-600 dark:text-white">
                   ${listing.price}/{listing.priceUnit}
                 </div>
                 <div className="mt-3 flex flex-col gap-2">
@@ -219,15 +219,15 @@ const ListingDetails = () => {
 
             <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="md:col-span-2">
-                <h2 className="text-lg font-semibold text-gray-900 mb-2">Description</h2>
-                <p className="text-gray-700 leading-relaxed">{listing.description}</p>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Description</h2>
+                <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{listing.description}</p>
 
                 {listing.features?.length > 0 && (
                   <div className="mt-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Features</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Features</h3>
                     <div className="flex flex-wrap gap-2">
                       {listing.features.map((f, idx) => (
-                        <span key={idx} className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">{f}</span>
+                        <span key={idx} className="px-3 py-1 bg-gray-100 dark:bg-gray-900 text-gray-700 dark:text-white rounded-full text-sm border dark:border-gray-800">{f}</span>
                       ))}
                     </div>
                   </div>
@@ -235,9 +235,9 @@ const ListingDetails = () => {
               </div>
 
               <div>
-                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Availability</h3>
-                  <p className="text-gray-700">
+                <div className="bg-gray-50 dark:bg-black rounded-lg p-4 border border-gray-200 dark:border-gray-800">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Availability</h3>
+                  <p className="text-gray-700 dark:text-gray-300">
                     From {new Date(listing.availability?.startDate).toLocaleDateString()} to {new Date(listing.availability?.endDate).toLocaleDateString()}
                   </p>
                 </div>
@@ -246,25 +246,25 @@ const ListingDetails = () => {
           </div>
         </div>
         {/* Reviews */}
-        <div className="bg-white border border-gray-200 rounded-lg overflow-hidden mt-6 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Reviews ({reviews.length})</h3>
+        <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg overflow-hidden mt-6 p-6">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Reviews ({reviews.length})</h3>
           {reviews.length === 0 ? (
-            <p className="text-gray-600">No reviews yet.</p>
+            <p className="text-gray-600 dark:text-gray-300">No reviews yet.</p>
           ) : (
             <div className="space-y-4">
               {reviews.map((r) => (
-                <div key={r._id} className="border border-gray-100 rounded-lg p-4">
+                <div key={r._id} className="border border-gray-100 dark:border-gray-800 rounded-lg p-4 bg-white dark:bg-black">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-gray-200 rounded-full" />
+                      <div className="w-8 h-8 bg-gray-200 dark:bg-gray-800 rounded-full" />
                       <div>
-                        <p className="font-medium text-gray-900">{r.reviewer?.name || 'User'}</p>
-                        <p className="text-xs text-gray-500">{new Date(r.createdAt).toLocaleDateString()}</p>
+                        <p className="font-medium text-gray-900 dark:text-white">{r.reviewer?.name || 'User'}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{new Date(r.createdAt).toLocaleDateString()}</p>
                       </div>
                     </div>
                     <div className="text-yellow-500 font-semibold">{r.rating} / 5</div>
                   </div>
-                  {r.comment && <p className="mt-2 text-gray-700">{r.comment}</p>}
+                  {r.comment && <p className="mt-2 text-gray-700 dark:text-gray-300">{r.comment}</p>}
                 </div>
               ))}
             </div>

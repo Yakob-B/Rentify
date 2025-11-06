@@ -48,21 +48,21 @@ const LoginPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-black flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
           <div className="w-12 h-12 bg-primary-600 rounded-lg flex items-center justify-center">
             <span className="text-white font-bold text-xl">R</span>
           </div>
         </div>
-        <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
+        <h2 className="mt-6 text-center text-3xl font-bold text-gray-900 dark:text-white">
           Sign in to your account
         </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
+        <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-300">
           Or{' '}
           <Link
             to="/register"
-            className="font-medium text-primary-600 hover:text-primary-500"
+            className="font-medium text-primary-600 dark:text-white hover:text-primary-500 dark:hover:text-gray-300"
           >
             create a new account
           </Link>
@@ -70,10 +70,10 @@ const LoginPage = () => {
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+        <div className="bg-white dark:bg-black py-8 px-4 shadow sm:rounded-lg sm:px-10 border dark:border-gray-800">
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-white">
                 Email address
               </label>
               <div className="mt-1">
@@ -95,7 +95,7 @@ const LoginPage = () => {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-white">
                 Password
               </label>
               <div className="mt-1 relative">

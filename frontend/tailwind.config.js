@@ -35,6 +35,7 @@ export default {
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
+        display: ['Inter', 'system-ui', 'sans-serif'], // Geometric sans-serif for headings
       },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-in-out',

@@ -57,26 +57,26 @@ const DashboardPage = () => {
 
   const renderOverview = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div className="bg-white dark:bg-black rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-6">
         <div className="flex items-center">
-          <div className="p-2 bg-primary-100 rounded-lg">
-            <EyeIcon className="w-6 h-6 text-primary-600" />
+          <div className="p-2 bg-primary-100 dark:bg-gray-900 rounded-lg">
+            <EyeIcon className="w-6 h-6 text-primary-600 dark:text-white" />
           </div>
           <div className="ml-4">
-            <p className="text-sm font-medium text-gray-600">Total Listings</p>
-            <p className="text-2xl font-semibold text-gray-900">{listings.length}</p>
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Listings</p>
+            <p className="text-2xl font-semibold text-gray-900 dark:text-white">{listings.length}</p>
           </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div className="bg-white dark:bg-black rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-6">
         <div className="flex items-center">
-          <div className="p-2 bg-green-100 rounded-lg">
-            <CalendarIcon className="w-6 h-6 text-green-600" />
+          <div className="p-2 bg-green-100 dark:bg-gray-900 rounded-lg">
+            <CalendarIcon className="w-6 h-6 text-green-600 dark:text-white" />
           </div>
           <div className="ml-4">
-            <p className="text-sm font-medium text-gray-600">Active Bookings</p>
-            <p className="text-2xl font-semibold text-gray-900">
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Active Bookings</p>
+            <p className="text-2xl font-semibold text-gray-900 dark:text-white">
               {bookings.filter(b => b.status === 'approved').length}
             </p>
           </div>
@@ -100,14 +100,14 @@ const DashboardPage = () => {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div className="bg-white dark:bg-black rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-6">
         <div className="flex items-center">
-          <div className="p-2 bg-blue-100 rounded-lg">
-            <UserGroupIcon className="w-6 h-6 text-blue-600" />
+          <div className="p-2 bg-blue-100 dark:bg-gray-900 rounded-lg">
+            <UserGroupIcon className="w-6 h-6 text-blue-600 dark:text-white" />
           </div>
           <div className="ml-4">
-            <p className="text-sm font-medium text-gray-600">Pending Requests</p>
-            <p className="text-2xl font-semibold text-gray-900">
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Pending Requests</p>
+            <p className="text-2xl font-semibold text-gray-900 dark:text-white">
               {bookings.filter(b => b.status === 'pending').length}
             </p>
           </div>
@@ -483,7 +483,7 @@ const DashboardPage = () => {
   )
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>

@@ -247,31 +247,31 @@ const AdminPanel = () => {
     <div className="space-y-6">
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-white dark:bg-black rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-6">
           <div className="flex items-center">
             <div className="p-2 bg-blue-100 rounded-lg">
               <UsersIcon className="w-6 h-6 text-blue-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Users</p>
-              <p className="text-2xl font-semibold text-gray-900">{stats.totalUsers}</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Users</p>
+              <p className="text-2xl font-semibold text-gray-900 dark:text-white">{stats.totalUsers}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-white dark:bg-black rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-6">
           <div className="flex items-center">
             <div className="p-2 bg-green-100 rounded-lg">
               <EyeIcon className="w-6 h-6 text-green-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Listings</p>
-              <p className="text-2xl font-semibold text-gray-900">{stats.totalListings}</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Listings</p>
+              <p className="text-2xl font-semibold text-gray-900 dark:text-white">{stats.totalListings}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-white dark:bg-black rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-6">
           <div className="flex items-center">
             <div className="p-2 bg-purple-100 rounded-lg">
               <CalendarIcon className="w-6 h-6 text-purple-600" />
@@ -283,7 +283,7 @@ const AdminPanel = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-white dark:bg-black rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-6">
           <div className="flex items-center">
             <div className="p-2 bg-yellow-100 rounded-lg">
               <ExclamationTriangleIcon className="w-6 h-6 text-yellow-600" />
@@ -295,7 +295,7 @@ const AdminPanel = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-white dark:bg-black rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-6">
           <div className="flex items-center">
             <div className="p-2 bg-blue-100 rounded-lg">
               <CheckCircleIcon className="w-6 h-6 text-blue-600" />
@@ -307,7 +307,7 @@ const AdminPanel = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-white dark:bg-black rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-6">
           <div className="flex items-center">
             <div className="p-2 bg-green-100 rounded-lg">
               <XCircleIcon className="w-6 h-6 text-green-600" />
@@ -858,7 +858,7 @@ const AdminPanel = () => {
   )
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Admin Panel</h1>

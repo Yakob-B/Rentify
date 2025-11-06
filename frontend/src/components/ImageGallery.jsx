@@ -61,7 +61,7 @@ const ImageGallery = ({ images, title = 'Image Gallery' }) => {
       {/* Thumbnail Grid */}
       <div className="space-y-4">
         {/* Main Image */}
-        <div className="relative w-full h-96 rounded-lg overflow-hidden bg-gray-100 cursor-pointer group" onClick={() => openModal(0)}>
+        <div className="relative w-full h-96 rounded-lg overflow-hidden bg-gray-100 dark:bg-black cursor-pointer group" onClick={() => openModal(0)}>
           <LazyImage
             src={images[0]}
             alt={`${title} - Main`}
@@ -80,7 +80,7 @@ const ImageGallery = ({ images, title = 'Image Gallery' }) => {
             {images.slice(0, 6).map((image, index) => (
               <div
                 key={index}
-                className="relative aspect-square rounded-lg overflow-hidden cursor-pointer group border-2 border-transparent hover:border-primary-500 transition-all"
+                className="relative aspect-square rounded-lg overflow-hidden cursor-pointer group border-2 border-transparent dark:border-gray-800 hover:border-primary-500 dark:hover:border-white transition-all"
                 onClick={() => openModal(index)}
               >
                 <LazyImage

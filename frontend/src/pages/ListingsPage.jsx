@@ -100,24 +100,24 @@ const ListingsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Browse Listings</h1>
-          <p className="text-gray-600">Find items by category, price and location.</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Browse Listings</h1>
+          <p className="text-gray-600 dark:text-gray-300">Find items by category, price and location.</p>
         </div>
 
         {/* Search and Filters */}
-        <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6 space-y-4">
+        <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg p-4 mb-6 space-y-4">
           {/* Main Search Bar */}
           <div className="relative">
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
             <input
               type="text"
               placeholder="Search listings by title or description..."
               value={search}
               onChange={(e) => updateParam('search', e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-black dark:text-white dark:placeholder-gray-500"
             />
           </div>
 
@@ -261,9 +261,9 @@ const ListingsPage = () => {
 
           {/* Active Filters Display */}
           {(category || location || search || minPrice || maxPrice || startDate || endDate || minRating || priceUnit) && (
-            <div className="border-t border-gray-200 pt-4">
+            <div className="border-t border-gray-200 dark:border-gray-800 pt-4">
               <div className="flex flex-wrap gap-2 items-center">
-                <span className="text-sm font-medium text-gray-700">Active Filters:</span>
+                <span className="text-sm font-medium text-gray-700 dark:text-white">Active Filters:</span>
                 {search && (
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-primary-100 text-primary-800">
                     Search: {search}
@@ -374,7 +374,7 @@ const ListingsPage = () => {
           </div>
         ) : (
           <div className="text-center py-16">
-            <p className="text-gray-600">No listings found. Try different filters.</p>
+            <p className="text-gray-600 dark:text-gray-300">No listings found. Try different filters.</p>
           </div>
         )}
 

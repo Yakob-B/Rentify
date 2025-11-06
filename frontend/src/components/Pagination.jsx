@@ -29,7 +29,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange, showPageNumbers = t
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage <= 1}
-        className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1"
+        className="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-sm font-medium text-gray-700 dark:text-white bg-white dark:bg-black hover:bg-gray-50 dark:hover:bg-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1"
         aria-label="Previous page"
       >
         <ChevronLeftIcon className="w-4 h-4" />
@@ -43,12 +43,12 @@ const Pagination = ({ currentPage, totalPages, onPageChange, showPageNumbers = t
             <>
               <button
                 onClick={() => onPageChange(1)}
-                className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                className="px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-sm font-medium text-gray-700 dark:text-white bg-white dark:bg-black hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors"
               >
                 1
               </button>
               {pages[0] > 2 && (
-                <span className="px-2 text-gray-500">...</span>
+                <span className="px-2 text-gray-500 dark:text-gray-400">...</span>
               )}
             </>
           )}
@@ -72,11 +72,11 @@ const Pagination = ({ currentPage, totalPages, onPageChange, showPageNumbers = t
           {pages[pages.length - 1] < totalPages && (
             <>
               {pages[pages.length - 1] < totalPages - 1 && (
-                <span className="px-2 text-gray-500">...</span>
+                <span className="px-2 text-gray-500 dark:text-gray-400">...</span>
               )}
               <button
                 onClick={() => onPageChange(totalPages)}
-                className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                className="px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-sm font-medium text-gray-700 dark:text-white bg-white dark:bg-black hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors"
               >
                 {totalPages}
               </button>
@@ -89,7 +89,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange, showPageNumbers = t
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage >= totalPages}
-        className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1"
+        className="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-sm font-medium text-gray-700 dark:text-white bg-white dark:bg-black hover:bg-gray-50 dark:hover:bg-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1"
         aria-label="Next page"
       >
         <span className="hidden sm:inline">Next</span>
@@ -97,7 +97,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange, showPageNumbers = t
       </button>
 
       {/* Page Info */}
-      <div className="ml-4 text-sm text-gray-600 hidden md:block">
+      <div className="ml-4 text-sm text-gray-600 dark:text-gray-300 hidden md:block">
         Page {currentPage} of {totalPages}
       </div>
     </div>
