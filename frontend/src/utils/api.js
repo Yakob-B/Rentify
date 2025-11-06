@@ -87,6 +87,7 @@ export const getUserBookings = (params = {}) => {
 export const getBookingById = (id) => api.get(`/bookings/${id}`)
 export const updateBookingStatus = (id, statusData) => api.put(`/bookings/${id}/status`, statusData)
 export const cancelBooking = (id, reason) => api.put(`/bookings/${id}/cancel`, { reason })
+export const completeBooking = (id) => api.put(`/bookings/${id}/complete`)
 export const getAllBookings = (params = {}) => {
   const queryParams = new URLSearchParams(params).toString()
   return api.get(`/bookings/admin/all${queryParams ? `?${queryParams}` : ''}`)
@@ -103,6 +104,9 @@ export const createCheckoutSession = (bookingId) => api.post('/payments/checkout
 export const initiateTelebirrPayment = (bookingId) => api.post('/payments/telebirr/initiate', { bookingId })
 export const queryTelebirrPaymentStatus = (bookingId) => api.get(`/payments/telebirr/status/${bookingId}`)
 export const refundTelebirrPayment = (bookingId, reason) => api.post('/payments/telebirr/refund', { bookingId, reason })
+
+// Admin Stats API
+export const getAdminStats = () => api.get('/admin/stats')
 
 // Admin Invitation API
 export const createAdminInvitation = (invitationData) => api.post('/admin/invitations', invitationData)
@@ -124,5 +128,26 @@ export const getUserAnalytics = (params = {}) => {
   const queryParams = new URLSearchParams(params).toString()
   return api.get(`/admin/users/analytics${queryParams ? `?${queryParams}` : ''}`)
 }
+
+// Messages API
+export const getOrCreateConversation = (data) => api.post('/messages/conversations', data)
+export const getUserConversations = () => api.get('/messages/conversations')
+export const getConversationById = (id) => api.get(`/messages/conversations/${id}`)
+export const getConversationMessages = (id, params = {}) => {
+  const queryParams = new URLSearchParams(params).toString()
+  return api.get(`/messages/conversations/${id}/messages${queryParams ? `?${queryParams}` : ''}`)
+}
+export const sendMessage = (conversationId, content) => api.post(`/messages/conversations/${conversationId}/messages`, { content })
+export const markConversationAsRead = (conversationId) => api.put(`/messages/conversations/${conversationId}/read`)
+
+// Favorites API
+export const addFavorite = (listingId) => api.post('/favorites', { listingId })
+export const removeFavorite = (listingId) => api.delete(`/favorites/${listingId}`)
+export const getUserFavorites = (params = {}) => {
+  const queryParams = new URLSearchParams(params).toString()
+  return api.get(`/favorites${queryParams ? `?${queryParams}` : ''}`)
+}
+export const checkFavorite = (listingId) => api.get(`/favorites/check/${listingId}`)
+export const checkMultipleFavorites = (listingIds) => api.post('/favorites/check-multiple', { listingIds })
 
 export default api

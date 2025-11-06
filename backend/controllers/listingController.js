@@ -13,6 +13,10 @@ const getListings = async (req, res) => {
       search,
       minPrice,
       maxPrice,
+      startDate,
+      endDate,
+      minRating,
+      priceUnit,
       page = 1,
       limit = 10,
       sortBy = 'createdAt',
@@ -39,6 +43,34 @@ const getListings = async (req, res) => {
       query.price = {};
       if (minPrice) query.price.$gte = Number(minPrice);
       if (maxPrice) query.price.$lte = Number(maxPrice);
+    }
+
+    // Filter by price unit
+    if (priceUnit) {
+      query.priceUnit = priceUnit;
+    }
+
+    // Filter by availability dates (listings available during the requested period)
+    if (startDate || endDate) {
+      query['availability.isAvailable'] = true;
+      if (startDate && endDate) {
+        // Listing must be available during the entire requested period
+        query.$and = [
+          { 'availability.startDate': { $lte: new Date(endDate) } },
+          { 'availability.endDate': { $gte: new Date(startDate) } }
+        ];
+      } else if (startDate) {
+        // Listing must be available from startDate onwards
+        query['availability.endDate'] = { $gte: new Date(startDate) };
+      } else if (endDate) {
+        // Listing must be available until endDate
+        query['availability.startDate'] = { $lte: new Date(endDate) };
+      }
+    }
+
+    // Filter by minimum rating
+    if (minRating) {
+      query['rating.average'] = { $gte: Number(minRating) };
     }
 
     // Text search on title/description

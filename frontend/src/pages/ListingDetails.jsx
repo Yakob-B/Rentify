@@ -1,19 +1,24 @@
 import React, { useEffect, useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
-import { getListingById, getListingReviews, upsertReview } from '../utils/api'
+import { getListingById, getListingReviews, upsertReview, getOrCreateConversation } from '../utils/api'
 import { getErrorMessage } from '../utils/errors'
 import Skeleton from '../components/Skeleton'
-import { MapPinIcon, StarIcon } from '@heroicons/react/24/outline'
+import ImageGallery from '../components/ImageGallery'
+import FavoriteButton from '../components/FavoriteButton'
+import { MapPinIcon, StarIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline'
 
 const ListingDetails = () => {
   const { id } = useParams()
+  const navigate = useNavigate()
   const [listing, setListing] = useState(null)
   const [loading, setLoading] = useState(true)
   const [reviews, setReviews] = useState([])
   const [reviewLoading, setReviewLoading] = useState(false)
   const [myRating, setMyRating] = useState(0)
   const [myComment, setMyComment] = useState('')
+  const [messaging, setMessaging] = useState(false)
+  const user = JSON.parse(localStorage.getItem('user') || 'null')
 
   useEffect(() => {
     const run = async () => {
@@ -65,6 +70,35 @@ const ListingDetails = () => {
     }
   }
 
+  const handleMessageOwner = async () => {
+    if (!user) {
+      toast.error('Please login to message the owner')
+      navigate('/login')
+      return
+    }
+
+    if (!listing?.owner) return
+
+    // Check if user is the owner
+    if (listing.owner._id === user._id || listing.owner === user._id) {
+      toast.error('You cannot message yourself')
+      return
+    }
+
+    setMessaging(true)
+    try {
+      const conversation = await getOrCreateConversation({
+        recipientId: listing.owner._id || listing.owner,
+        listingId: id
+      })
+      navigate(`/messages/${conversation._id}`)
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Failed to start conversation'))
+    } finally {
+      setMessaging(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="max-w-5xl mx-auto p-6">
@@ -89,12 +123,13 @@ const ListingDetails = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-          <img
-            src={listing.images?.[0] || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600"%3E%3Crect fill="%23f3f4f6" width="800" height="600"/%3E%3Ctext fill="%239ca3af" font-family="system-ui, sans-serif" font-size="24" x="50%25" y="50%25" text-anchor="middle" dominant-baseline="middle"%3ENo Image Available%3C/text%3E%3C/svg%3E'}
-            alt={listing.title}
-            className="w-full h-80 object-cover"
-          />
-          <div className="p-6">
+          <div className="p-6 relative">
+            <div className="absolute top-6 right-6 z-10">
+              <FavoriteButton listingId={listing._id} />
+            </div>
+            <ImageGallery images={listing.images || []} title={listing.title} />
+          </div>
+          <div className="p-6 pt-0">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">{listing.title}</h1>
@@ -113,7 +148,19 @@ const ListingDetails = () => {
                 <div className="text-3xl font-bold text-primary-600">
                   ${listing.price}/{listing.priceUnit}
                 </div>
-                <Link to={`/bookings/${listing._id}`} className="btn-primary mt-3 inline-block">Request Booking</Link>
+                <div className="mt-3 flex flex-col gap-2">
+                  <Link to={`/bookings/${listing._id}`} className="btn-primary inline-block text-center">Request Booking</Link>
+                  {user && listing.owner && (listing.owner._id !== user._id && listing.owner !== user._id) && (
+                    <button
+                      onClick={handleMessageOwner}
+                      disabled={messaging}
+                      className="btn-secondary inline-flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                      <ChatBubbleLeftRightIcon className="w-4 h-4" />
+                      {messaging ? 'Opening...' : 'Message Owner'}
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -171,8 +218,15 @@ const ListingDetails = () => {
           )}
 
           {/* Submit review (only if not owner) */}
-          {listing?.owner && JSON.parse(localStorage.getItem('user') || 'null')?.role && (
-            <form onSubmit={handleSubmitReview} className="mt-6 space-y-3">
+          {(() => {
+            const currentUser = JSON.parse(localStorage.getItem('user') || 'null')
+            const isOwner = listing?.owner && currentUser && (
+              listing.owner._id === currentUser._id || 
+              listing.owner === currentUser._id
+            )
+            const isLoggedIn = currentUser && currentUser._id
+            return isLoggedIn && !isOwner && (
+              <form onSubmit={handleSubmitReview} className="mt-6 space-y-3">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <select value={myRating} onChange={(e) => setMyRating(e.target.value)} className="input-field" required>
                   <option value="">Rate this listing</option>
@@ -195,7 +249,8 @@ const ListingDetails = () => {
                 </button>
               </div>
             </form>
-          )}
+            )
+          })()}
         </div>
       </div>
     </div>

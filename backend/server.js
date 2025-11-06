@@ -26,6 +26,8 @@ app.use('/api/listings', require('./routes/listingRoutes'));
 app.use('/api/bookings', require('./routes/bookingRoutes'));
 app.use('/api/reviews', require('./routes/reviewRoutes'));
 app.use('/api/payments', require('./routes/paymentRoutes'));
+app.use('/api/messages', require('./routes/messageRoutes'));
+app.use('/api/favorites', require('./routes/favoriteRoutes'));
 
 // Database connection
 connectDB();

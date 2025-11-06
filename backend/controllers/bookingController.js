@@ -45,6 +45,23 @@ const createBooking = async (req, res) => {
       .populate('renter', 'name email phone')
       .populate('owner', 'name email phone');
 
+    // Send email notification to owner
+    try {
+      const emailData = emailTemplates.bookingRequest(
+        populatedBooking,
+        populatedBooking.listing,
+        populatedBooking.renter,
+        populatedBooking.owner
+      );
+      await sendEmail({
+        to: populatedBooking.owner.email,
+        ...emailData,
+      });
+    } catch (emailError) {
+      console.error('Failed to send booking request email:', emailError);
+      // Don't fail the request if email fails
+    }
+
     res.status(201).json(populatedBooking);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -143,6 +160,34 @@ const updateBookingStatus = async (req, res) => {
       .populate('renter', 'name email phone avatar')
       .populate('owner', 'name email phone avatar');
 
+    // Send email notification to renter
+    try {
+      if (status === 'approved') {
+        const emailData = emailTemplates.bookingApproved(
+          populatedBooking,
+          populatedBooking.listing,
+          populatedBooking.renter
+        );
+        await sendEmail({
+          to: populatedBooking.renter.email,
+          ...emailData,
+        });
+      } else if (status === 'rejected') {
+        const emailData = emailTemplates.bookingRejected(
+          populatedBooking,
+          populatedBooking.listing,
+          populatedBooking.renter
+        );
+        await sendEmail({
+          to: populatedBooking.renter.email,
+          ...emailData,
+        });
+      }
+    } catch (emailError) {
+      console.error('Failed to send booking status email:', emailError);
+      // Don't fail the request if email fails
+    }
+
     res.json(populatedBooking);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -188,6 +233,86 @@ const cancelBooking = async (req, res) => {
   }
 };
 
+// @desc    Complete booking
+// @route   PUT /api/bookings/:id/complete
+// @access  Private
+const completeBooking = async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id);
+    if (!booking) {
+      return res.status(404).json({ message: 'Booking not found' });
+    }
+
+    // Check if user is involved in this booking (owner or renter)
+    const isOwner = booking.owner.toString() === req.user.id;
+    const isRenter = booking.renter.toString() === req.user.id;
+    
+    if (!isOwner && !isRenter && req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Not authorized to complete this booking' });
+    }
+
+    // Check if booking can be completed
+    if (booking.status === 'completed') {
+      return res.status(400).json({ message: 'Booking is already completed' });
+    }
+
+    if (booking.status !== 'approved') {
+      return res.status(400).json({ message: 'Only approved bookings can be completed' });
+    }
+
+    // Check if payment is completed
+    if (booking.paymentStatus !== 'paid') {
+      return res.status(400).json({ message: 'Payment must be completed before marking booking as complete' });
+    }
+
+    // Check if end date has passed (optional - can be removed if you want to allow early completion)
+    const endDate = new Date(booking.endDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    endDate.setHours(0, 0, 0, 0);
+    
+    // Allow completion if end date has passed or if admin is completing
+    if (endDate > today && req.user.role !== 'admin') {
+      return res.status(400).json({ message: 'Booking can only be completed after the end date' });
+    }
+
+    booking.status = 'completed';
+    const updatedBooking = await booking.save();
+    
+    const populatedBooking = await Booking.findById(updatedBooking._id)
+      .populate('listing', 'title price priceUnit images')
+      .populate('renter', 'name email phone avatar')
+      .populate('owner', 'name email phone avatar');
+
+    // Send email notification to renter and owner
+    try {
+      const emailData = emailTemplates.bookingCompleted(
+        populatedBooking,
+        populatedBooking.listing,
+        populatedBooking.renter,
+        populatedBooking.owner
+      );
+      await sendEmail({
+        to: populatedBooking.renter.email,
+        ...emailData,
+      });
+      // Also notify owner
+      await sendEmail({
+        to: populatedBooking.owner.email,
+        subject: `Booking Completed: ${populatedBooking.listing.title}`,
+        html: emailData.html.replace(`Hello ${populatedBooking.renter.name}`, `Hello ${populatedBooking.owner.name}`).replace('Your booking', 'A booking for your listing'),
+      });
+    } catch (emailError) {
+      console.error('Failed to send booking completion email:', emailError);
+      // Don't fail the request if email fails
+    }
+
+    res.json(populatedBooking);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // @desc    Get all bookings (Admin)
 // @route   GET /api/bookings/admin/all
 // @access  Private/Admin
@@ -224,5 +349,6 @@ module.exports = {
   getBookingById,
   updateBookingStatus,
   cancelBooking,
+  completeBooking,
   getAllBookings
 };

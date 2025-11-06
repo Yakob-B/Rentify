@@ -12,7 +12,7 @@ import {
   XCircleIcon,
   XMarkIcon
 } from '@heroicons/react/24/outline'
-import { getAllBookings, createAdminInvitation, getAdminInvitations, revokeAdminInvitation, updateBookingStatus } from '../utils/api'
+import { getAllBookings, createAdminInvitation, getAdminInvitations, revokeAdminInvitation, updateBookingStatus, getAdminStats } from '../utils/api'
 import UserManagement from '../components/UserManagement'
 
 const AdminPanel = () => {
@@ -51,21 +51,22 @@ const AdminPanel = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const bookingsData = await getAllBookings()
+        const [bookingsData, statsData] = await Promise.all([
+          getAllBookings(),
+          getAdminStats()
+        ])
         setBookings(bookingsData.bookings || [])
-        
-        // Calculate stats
-        const statsData = {
-          totalUsers: 150, // This would come from API
-          totalListings: 89, // This would come from API
-          totalBookings: bookingsData.bookings?.length || 0,
-          pendingBookings: bookingsData.bookings?.filter(b => b.status === 'pending').length || 0,
-          activeBookings: bookingsData.bookings?.filter(b => b.status === 'approved').length || 0,
-          completedBookings: bookingsData.bookings?.filter(b => b.status === 'completed').length || 0
-        }
-        setStats(statsData)
+        setStats({
+          totalUsers: statsData.totalUsers || 0,
+          totalListings: statsData.totalListings || 0,
+          totalBookings: statsData.totalBookings || 0,
+          pendingBookings: statsData.pendingBookings || 0,
+          activeBookings: statsData.activeBookings || 0,
+          completedBookings: statsData.completedBookings || 0
+        })
       } catch (error) {
         console.error('Error fetching admin data:', error)
+        toast.error(getErrorMessage(error, 'Failed to load admin statistics'))
       } finally {
         setLoading(false)
       }

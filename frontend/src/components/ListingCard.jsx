@@ -4,13 +4,12 @@ import {
   MapPinIcon, 
   StarIcon, 
   EyeIcon,
-  CalendarIcon,
-  HeartIcon
+  CalendarIcon
 } from '@heroicons/react/24/outline'
-import { StarIcon as StarIconSolid, HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid'
+import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid'
+import FavoriteButton from './FavoriteButton'
 
 const ListingCard = ({ listing }) => {
-  const [isLiked, setIsLiked] = useState(false)
   const [imageLoaded, setImageLoaded] = useState(false)
 
   const formatPrice = (price, unit) => {
@@ -19,12 +18,6 @@ const ListingCard = ({ listing }) => {
 
   const formatDate = (date) => {
     return new Date(date).toLocaleDateString()
-  }
-
-  const handleLike = (e) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setIsLiked(!isLiked)
   }
 
   return (
@@ -45,17 +38,10 @@ const ListingCard = ({ listing }) => {
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             
-            {/* Like button */}
-            <button
-              onClick={handleLike}
-              className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-lg hover:bg-white transition-all duration-200 hover:scale-110 z-10"
-            >
-              {isLiked ? (
-                <HeartIconSolid className="w-4 h-4 text-red-500" />
-              ) : (
-                <HeartIcon className="w-4 h-4 text-gray-600" />
-              )}
-            </button>
+            {/* Favorite button */}
+            <div className="absolute top-3 right-3 z-10" onClick={(e) => e.stopPropagation()}>
+              <FavoriteButton listingId={listing._id} />
+            </div>
 
             <div className="absolute top-3 left-3 flex flex-wrap gap-2">
               {listing.category?.name && (

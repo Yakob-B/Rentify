@@ -1,6 +1,7 @@
 const Stripe = require('stripe');
 const Booking = require('../models/bookingModel');
 const Listing = require('../models/listingModel');
+const { sendEmail, emailTemplates } = require('../utils/email');
 
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -66,10 +67,28 @@ const webhook = async (req, res) => {
       const session = event.data.object;
       const bookingId = session.metadata?.bookingId;
       if (bookingId) {
-        const booking = await Booking.findById(bookingId);
+        const booking = await Booking.findById(bookingId)
+          .populate('listing', 'title price priceUnit images')
+          .populate('renter', 'name email phone avatar')
+          .populate('owner', 'name email phone avatar');
         if (booking) {
           booking.paymentStatus = 'paid';
           await booking.save();
+          
+          // Send email notification to owner
+          try {
+            const emailData = emailTemplates.paymentReceived(
+              booking,
+              booking.listing,
+              booking.owner
+            );
+            await sendEmail({
+              to: booking.owner.email,
+              ...emailData,
+            });
+          } catch (emailError) {
+            console.error('Failed to send payment received email:', emailError);
+          }
         }
       }
     }

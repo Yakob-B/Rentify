@@ -8,9 +8,12 @@ import {
   CalendarIcon,
   CurrencyDollarIcon,
   UserGroupIcon,
-  ChartBarIcon
+  ChartBarIcon,
+  XMarkIcon,
+  CreditCardIcon,
+  DevicePhoneMobileIcon
 } from '@heroicons/react/24/outline'
-import { getUserListings, getUserBookings, deleteListing, updateBookingStatus, cancelBooking, createCheckoutSession } from '../utils/api'
+import { getUserListings, getUserBookings, deleteListing, updateBookingStatus, cancelBooking, completeBooking, createCheckoutSession, initiateTelebirrPayment, queryTelebirrPaymentStatus } from '../utils/api'
 
 const DashboardPage = () => {
   const [activeTab, setActiveTab] = useState('overview')
@@ -19,6 +22,11 @@ const DashboardPage = () => {
   const [loading, setLoading] = useState(true)
   const [actionLoadingId, setActionLoadingId] = useState(null)
   const [bookingView, setBookingView] = useState('owner') // 'owner' | 'renter'
+  const [showPaymentModal, setShowPaymentModal] = useState(false)
+  const [selectedBookingForPayment, setSelectedBookingForPayment] = useState(null)
+  const [paymentMethod, setPaymentMethod] = useState('stripe') // 'stripe' | 'telebirr'
+  const [telebirrPaymentUrl, setTelebirrPaymentUrl] = useState(null)
+  const [telebirrQrCode, setTelebirrQrCode] = useState(null)
   const user = JSON.parse(localStorage.getItem('user') || 'null')
 
   useEffect(() => {
@@ -145,6 +153,76 @@ const DashboardPage = () => {
       toast.success('Booking cancelled')
     } catch (err) {
       toast.error(getErrorMessage(err, 'Cancel failed'))
+    } finally {
+      setActionLoadingId(null)
+    }
+  }
+
+  const handleCompleteBooking = async (bookingId) => {
+    if (!window.confirm('Mark this booking as completed? This action cannot be undone.')) return
+    try {
+      setActionLoadingId(bookingId)
+      const updated = await completeBooking(bookingId)
+      setBookings(prev => prev.map(b => (b._id === bookingId ? updated : b)))
+      toast.success('Booking marked as completed')
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Failed to complete booking'))
+    } finally {
+      setActionLoadingId(null)
+    }
+  }
+
+  const handlePaymentMethodSelect = (booking) => {
+    setSelectedBookingForPayment(booking)
+    setShowPaymentModal(true)
+    setPaymentMethod('stripe')
+    setTelebirrPaymentUrl(null)
+    setTelebirrQrCode(null)
+  }
+
+  const handleProcessPayment = async () => {
+    if (!selectedBookingForPayment) return
+
+    try {
+      setActionLoadingId(selectedBookingForPayment._id)
+      
+      if (paymentMethod === 'stripe') {
+        // Stripe payment flow
+        const { url } = await createCheckoutSession(selectedBookingForPayment._id)
+        window.location.href = url
+      } else if (paymentMethod === 'telebirr') {
+        // Telebirr payment flow
+        const result = await initiateTelebirrPayment(selectedBookingForPayment._id)
+        if (result.paymentUrl) {
+          setTelebirrPaymentUrl(result.paymentUrl)
+          if (result.qrCode) {
+            setTelebirrQrCode(result.qrCode)
+          }
+          toast.success('Payment initiated. Please complete the payment.')
+          
+          // Poll for payment status
+          const checkPaymentStatus = setInterval(async () => {
+            try {
+              const statusResult = await queryTelebirrPaymentStatus(selectedBookingForPayment._id)
+              if (statusResult.paymentStatus === 'paid') {
+                clearInterval(checkPaymentStatus)
+                toast.success('Payment confirmed!')
+                setShowPaymentModal(false)
+                // Refresh bookings
+                const bookingsData = await getUserBookings({ type: bookingView === 'owner' ? 'as-owner' : 'as-renter' })
+                setBookings(bookingsData || [])
+              }
+            } catch (err) {
+              // Silent fail for polling
+            }
+          }, 3000) // Check every 3 seconds
+
+          // Stop polling after 5 minutes
+          setTimeout(() => clearInterval(checkPaymentStatus), 300000)
+        }
+      }
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Failed to initiate payment'))
     } finally {
       setActionLoadingId(null)
     }
@@ -326,43 +404,46 @@ const DashboardPage = () => {
                 >
                   View Details
                 </Link>
-                {bookingView === 'owner' && booking.status === 'pending' && user._id === booking.owner._id && (
+                {bookingView === 'owner' && user._id === booking.owner._id && (
                   <>
-                    <button
-                      onClick={() => handleApproveReject(booking._id, 'approved')}
-                      disabled={actionLoadingId === booking._id}
-                      className="btn-primary disabled:opacity-50"
-                    >
-                      {actionLoadingId === booking._id ? 'Approving...' : 'Approve'}
-                    </button>
-                    <button
-                      onClick={() => handleApproveReject(booking._id, 'rejected')}
-                      disabled={actionLoadingId === booking._id}
-                      className="btn-secondary disabled:opacity-50"
-                    >
-                      {actionLoadingId === booking._id ? 'Rejecting...' : 'Reject'}
-                    </button>
+                    {booking.status === 'pending' && (
+                      <>
+                        <button
+                          onClick={() => handleApproveReject(booking._id, 'approved')}
+                          disabled={actionLoadingId === booking._id}
+                          className="btn-primary disabled:opacity-50"
+                        >
+                          {actionLoadingId === booking._id ? 'Approving...' : 'Approve'}
+                        </button>
+                        <button
+                          onClick={() => handleApproveReject(booking._id, 'rejected')}
+                          disabled={actionLoadingId === booking._id}
+                          className="btn-secondary disabled:opacity-50"
+                        >
+                          {actionLoadingId === booking._id ? 'Rejecting...' : 'Reject'}
+                        </button>
+                      </>
+                    )}
+                    {booking.status === 'approved' && booking.paymentStatus === 'paid' && (
+                      <button
+                        onClick={() => handleCompleteBooking(booking._id)}
+                        disabled={actionLoadingId === booking._id}
+                        className="btn-primary disabled:opacity-50"
+                      >
+                        {actionLoadingId === booking._id ? 'Completing...' : 'Mark as Completed'}
+                      </button>
+                    )}
                   </>
                 )}
                 {bookingView === 'renter' && user._id === booking.renter._id && (
                   <>
                     {booking.status === 'approved' && booking.paymentStatus !== 'paid' && (
                       <button
-                        onClick={async () => {
-                          try {
-                            setActionLoadingId(booking._id)
-                            const { url } = await createCheckoutSession(booking._id)
-                            window.location.href = url
-                          } catch (err) {
-                            toast.error(getErrorMessage(err, 'Failed to start checkout'))
-                          } finally {
-                            setActionLoadingId(null)
-                          }
-                        }}
+                        onClick={() => handlePaymentMethodSelect(booking)}
                         disabled={actionLoadingId === booking._id}
                         className="btn-primary disabled:opacity-50"
                       >
-                        {actionLoadingId === booking._id ? 'Redirecting...' : 'Pay Now'}
+                        Pay Now
                       </button>
                     )}
                     {!['cancelled', 'completed'].includes(booking.status) && (
@@ -372,6 +453,15 @@ const DashboardPage = () => {
                         className="btn-danger disabled:opacity-50"
                       >
                         {actionLoadingId === booking._id ? 'Cancelling...' : 'Cancel'}
+                      </button>
+                    )}
+                    {booking.status === 'approved' && booking.paymentStatus === 'paid' && (
+                      <button
+                        onClick={() => handleCompleteBooking(booking._id)}
+                        disabled={actionLoadingId === booking._id}
+                        className="btn-primary disabled:opacity-50"
+                      >
+                        {actionLoadingId === booking._id ? 'Completing...' : 'Mark as Completed'}
                       </button>
                     )}
                   </>
@@ -430,6 +520,136 @@ const DashboardPage = () => {
           {activeTab === 'bookings' && renderBookings()}
         </div>
       </div>
+
+      {/* Payment Method Selection Modal */}
+      {showPaymentModal && selectedBookingForPayment && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+            <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900">Select Payment Method</h3>
+              <button
+                onClick={() => {
+                  setShowPaymentModal(false)
+                  setSelectedBookingForPayment(null)
+                  setTelebirrPaymentUrl(null)
+                  setTelebirrQrCode(null)
+                }}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <XMarkIcon className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <div className="p-6">
+              {!telebirrPaymentUrl ? (
+                <>
+                  <div className="mb-4">
+                    <p className="text-sm text-gray-600 mb-4">
+                      Choose your preferred payment method for booking: <strong>{selectedBookingForPayment.listing.title}</strong>
+                    </p>
+                    <p className="text-lg font-semibold text-gray-900 mb-6">
+                      Total: ${selectedBookingForPayment.totalAmount}
+                    </p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <button
+                      onClick={() => setPaymentMethod('stripe')}
+                      className={`w-full p-4 border-2 rounded-lg flex items-center space-x-3 transition-all ${
+                        paymentMethod === 'stripe'
+                          ? 'border-primary-500 bg-primary-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <CreditCardIcon className={`w-6 h-6 ${paymentMethod === 'stripe' ? 'text-primary-600' : 'text-gray-400'}`} />
+                      <div className="flex-1 text-left">
+                        <div className="font-medium text-gray-900">Credit/Debit Card (Stripe)</div>
+                        <div className="text-sm text-gray-500">Pay securely with your card</div>
+                      </div>
+                      {paymentMethod === 'stripe' && (
+                        <div className="w-4 h-4 rounded-full bg-primary-600"></div>
+                      )}
+                    </button>
+
+                    <button
+                      onClick={() => setPaymentMethod('telebirr')}
+                      className={`w-full p-4 border-2 rounded-lg flex items-center space-x-3 transition-all ${
+                        paymentMethod === 'telebirr'
+                          ? 'border-primary-500 bg-primary-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <DevicePhoneMobileIcon className={`w-6 h-6 ${paymentMethod === 'telebirr' ? 'text-primary-600' : 'text-gray-400'}`} />
+                      <div className="flex-1 text-left">
+                        <div className="font-medium text-gray-900">Telebirr</div>
+                        <div className="text-sm text-gray-500">Pay with Telebirr mobile money</div>
+                      </div>
+                      {paymentMethod === 'telebirr' && (
+                        <div className="w-4 h-4 rounded-full bg-primary-600"></div>
+                      )}
+                    </button>
+                  </div>
+
+                  <div className="mt-6 flex space-x-3">
+                    <button
+                      onClick={() => {
+                        setShowPaymentModal(false)
+                        setSelectedBookingForPayment(null)
+                      }}
+                      className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleProcessPayment}
+                      disabled={actionLoadingId === selectedBookingForPayment._id}
+                      className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {actionLoadingId === selectedBookingForPayment._id ? 'Processing...' : 'Continue to Payment'}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div className="text-center">
+                  <p className="text-lg font-semibold text-gray-900 mb-4">Complete Your Payment</p>
+                  {telebirrQrCode && (
+                    <div className="mb-4">
+                      <img src={telebirrQrCode} alt="Payment QR Code" className="mx-auto w-48 h-48" />
+                      <p className="text-sm text-gray-600 mt-2">Scan QR code with Telebirr app</p>
+                    </div>
+                  )}
+                  {telebirrPaymentUrl && (
+                    <div className="mb-4">
+                      <a
+                        href={telebirrPaymentUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn-primary inline-block"
+                      >
+                        Open Payment Page
+                      </a>
+                    </div>
+                  )}
+                  <p className="text-sm text-gray-600 mb-4">
+                    Payment status will be updated automatically once confirmed.
+                  </p>
+                  <button
+                    onClick={() => {
+                      setShowPaymentModal(false)
+                      setSelectedBookingForPayment(null)
+                      setTelebirrPaymentUrl(null)
+                      setTelebirrQrCode(null)
+                    }}
+                    className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    Close
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

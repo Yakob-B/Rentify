@@ -1,6 +1,7 @@
 const TelebirrService = require('../utils/telebirr');
 const Booking = require('../models/bookingModel');
 const Listing = require('../models/listingModel');
+const { sendEmail, emailTemplates } = require('../utils/email');
 
 // @desc    Initiate Telebirr payment for booking
 // @route   POST /api/payments/telebirr/initiate
@@ -172,7 +173,21 @@ const handleTelebirrWebhook = async (req, res) => {
           booking.paymentDetails.paidAt = new Date(notification.paidAt);
           booking.paymentDetails.providerTransactionId = notification.transactionId;
           
-          // You might want to send confirmation email here
+          // Send email notification to owner
+          try {
+            const emailData = emailTemplates.paymentReceived(
+              booking,
+              booking.listing,
+              booking.owner
+            );
+            await sendEmail({
+              to: booking.owner.email,
+              ...emailData,
+            });
+          } catch (emailError) {
+            console.error('Failed to send payment received email:', emailError);
+          }
+          
           console.log(`Payment successful for booking ${booking._id}`);
         } else if (notification.status === 'FAILED') {
           booking.paymentStatus = 'failed';

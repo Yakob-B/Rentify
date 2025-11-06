@@ -10,7 +10,9 @@ import {
   PlusIcon,
   Cog6ToothIcon,
   ArrowRightOnRectangleIcon,
-  SparklesIcon
+  SparklesIcon,
+  ChatBubbleLeftRightIcon,
+  HeartIcon
 } from '@heroicons/react/24/outline'
 import ThemeToggle from './ThemeToggle'
 
@@ -98,6 +100,12 @@ const Navbar = () => {
             {user ? (
               <div className="flex items-center space-x-4">
                 <Link 
+                  to="/messages" 
+                  className="relative text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 hover:scale-105"
+                >
+                  <ChatBubbleLeftRightIcon className="w-5 h-5" />
+                </Link>
+                <Link 
                   to="/listings/new" 
                   className="btn-primary flex items-center space-x-2 hover:scale-105 active:scale-95 transition-all duration-300"
                 >
@@ -118,6 +126,20 @@ const Navbar = () => {
                     >
                       <HomeIcon className="w-4 h-4" />
                       <span>Dashboard</span>
+                    </Link>
+                    <Link 
+                      to="/messages" 
+                      className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-all duration-200 hover:translate-x-1"
+                    >
+                      <ChatBubbleLeftRightIcon className="w-4 h-4" />
+                      <span>Messages</span>
+                    </Link>
+                    <Link 
+                      to="/favorites" 
+                      className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-all duration-200 hover:translate-x-1"
+                    >
+                      <HeartIcon className="w-4 h-4" />
+                      <span>Favorites</span>
                     </Link>
                     {user.role === 'admin' && (
                       <Link 
@@ -216,6 +238,20 @@ const Navbar = () => {
                   onClick={() => setIsOpen(false)}
                 >
                   Dashboard
+                </Link>
+                <Link 
+                  to="/messages" 
+                  className="text-gray-700 hover:text-primary-600 block px-3 py-2 rounded-md text-base font-medium transition-all duration-300 hover:translate-x-2 hover:bg-gray-50"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Messages
+                </Link>
+                <Link 
+                  to="/favorites" 
+                  className="text-gray-700 hover:text-primary-600 block px-3 py-2 rounded-md text-base font-medium transition-all duration-300 hover:translate-x-2 hover:bg-gray-50"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Favorites
                 </Link>
                 {user.role === 'admin' && (
                   <Link 

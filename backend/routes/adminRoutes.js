@@ -6,9 +6,13 @@ const {
   registerAdmin,
   validateInvitationToken
 } = require('../controllers/adminInvitationController');
+const { getAdminStats } = require('../controllers/adminStatsController');
 const { protect, adminOnly } = require('../middleware/authMiddleware');
 
 const router = express.Router();
+
+// Admin stats route (Admin only)
+router.get('/stats', protect, adminOnly, getAdminStats);
 
 // Admin invitation management routes (Admin only)
 router.post('/invitations', protect, adminOnly, createAdminInvitation);
