@@ -8,7 +8,8 @@
     "dev": "nodemon server.js",
     "backfill:geo": "node scripts/backfill-geo.js",
     "create-admin": "node scripts/create-first-admin.js",
-    "fix-admin-password": "node scripts/fix-admin-password.js"
+    "fix-admin-password": "node scripts/fix-admin-password.js",
+    "check-admin": "node scripts/check-admin.js"
   },
   "keywords": [
     "rentify",
