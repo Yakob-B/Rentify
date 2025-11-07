@@ -15,8 +15,8 @@ const adminInvitationSchema = new mongoose.Schema({
   },
   token: {
     type: String,
-    required: true,
     unique: true
+    // Token is generated in pre('validate') hook before validation, so it doesn't need to be required
   },
   expiresAt: {
     type: Date,
@@ -43,8 +43,8 @@ const adminInvitationSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Generate secure token
-adminInvitationSchema.pre('save', function(next) {
+// Generate secure token before saving (runs before validation)
+adminInvitationSchema.pre('validate', function(next) {
   if (!this.token) {
     this.token = crypto.randomBytes(32).toString('hex');
   }
