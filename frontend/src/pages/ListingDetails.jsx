@@ -122,24 +122,24 @@ const ListingDetails = () => {
   }
 
   // Generate structured data for SEO
-  const structuredData = listing ? {
+  const structuredData = listing && listing.title ? {
     '@context': 'https://schema.org',
     '@type': 'Product',
-    name: listing.title,
-    description: listing.description,
-    image: listing.images && listing.images.length > 0 ? listing.images : [],
+    name: listing.title || 'Rental Item',
+    description: listing.description || 'Rent this item on Rentify',
+    image: listing.images && Array.isArray(listing.images) && listing.images.length > 0 ? listing.images : [],
     offers: {
       '@type': 'Offer',
-      price: listing.price,
+      price: listing.price || 0,
       priceCurrency: 'USD',
       availability: listing.availability?.isAvailable 
         ? 'https://schema.org/InStock' 
         : 'https://schema.org/OutOfStock',
       priceSpecification: {
         '@type': 'UnitPriceSpecification',
-        price: listing.price,
+        price: listing.price || 0,
         priceCurrency: 'USD',
-        unitCode: listing.priceUnit
+        unitCode: listing.priceUnit || 'day'
       }
     },
     aggregateRating: listing.rating?.average ? {
@@ -147,16 +147,16 @@ const ListingDetails = () => {
       ratingValue: listing.rating.average,
       reviewCount: listing.rating.count || 0
     } : undefined,
-    location: {
+    location: listing.location ? {
       '@type': 'Place',
       address: {
         '@type': 'PostalAddress',
-        addressLocality: listing.location?.city,
-        addressRegion: listing.location?.state,
-        postalCode: listing.location?.zipCode,
-        streetAddress: listing.location?.address
+        addressLocality: listing.location.city || '',
+        addressRegion: listing.location.state || '',
+        postalCode: listing.location.zipCode || '',
+        streetAddress: listing.location.address || ''
       }
-    }
+    } : undefined
   } : null
 
   return (
@@ -164,11 +164,17 @@ const ListingDetails = () => {
       {listing && (
         <>
           <SEO
-            title={`${listing.title} - Rentify`}
-            description={listing.description.substring(0, 160)}
-            image={listing.images && listing.images[0] ? listing.images[0] : '/og-image.jpg'}
+            title={listing.title ? `${listing.title} - Rentify` : 'Rentify'}
+            description={listing.description && typeof listing.description === 'string' 
+              ? (listing.description.length > 160 ? listing.description.substring(0, 160) + '...' : listing.description)
+              : 'Rent this item on Rentify'}
+            image={listing.images && Array.isArray(listing.images) && listing.images.length > 0 && listing.images[0] 
+              ? listing.images[0] 
+              : '/og-image.jpg'}
             type="product"
-            keywords={`${listing.title}, ${listing.category?.name || ''}, rent, rental`}
+            keywords={listing.title 
+              ? `${listing.title}, ${listing.category?.name || ''}, rent, rental` 
+              : 'rent, rental'}
             canonical={`${window.location.origin}/listings/${listing._id}`}
           />
           <StructuredData data={structuredData} />
@@ -180,7 +186,7 @@ const ListingDetails = () => {
             <div className="absolute top-6 right-6 z-10">
               <FavoriteButton listingId={listing._id} />
             </div>
-            <ImageGallery images={listing.images || []} title={listing.title} />
+            <ImageGallery images={listing.images && Array.isArray(listing.images) ? listing.images : []} title={listing.title || 'Listing'} />
           </div>
           <div className="p-6 pt-0">
             <div className="flex items-start justify-between gap-4">
@@ -220,7 +226,7 @@ const ListingDetails = () => {
             <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="md:col-span-2">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Description</h2>
-                <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{listing.description}</p>
+                <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{listing.description || 'No description provided.'}</p>
 
                 {listing.features?.length > 0 && (
                   <div className="mt-6">
