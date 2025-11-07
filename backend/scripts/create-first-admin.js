@@ -6,7 +6,7 @@ require('dotenv').config();
 // Connect to database
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI);
+    const conn = await mongoose.connect(process.env.DB_URI);
     console.log(`MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
     console.error(`Error: ${error.message}`);
@@ -27,9 +27,9 @@ const createFirstAdmin = async () => {
     }
 
     // Get admin details from environment or use defaults
-    const adminName = process.env.FIRST_ADMIN_NAME || 'Admin';
-    const adminEmail = process.env.FIRST_ADMIN_EMAIL || 'admin@rentify.com';
-    const adminPassword = process.env.FIRST_ADMIN_PASSWORD || 'admin123';
+    const adminName = process.env.FIRST_ADMIN_NAME || 'Yakob';
+    const adminEmail = process.env.FIRST_ADMIN_EMAIL || 'yakobatechno@gmail.com';
+    const adminPassword = process.env.FIRST_ADMIN_PASSWORD || '@Qibat12345';
 
     // Check if user with this email already exists
     const existingUser = await User.findOne({ email: adminEmail });
