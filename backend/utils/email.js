@@ -305,6 +305,76 @@ const emailTemplates = {
       </html>
     `,
   }),
+
+  adminInvitation: (invitation, inviterName, invitationUrl) => ({
+    subject: `You're Invited to Join Rentify as an Administrator`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: #4F46E5; color: white; padding: 30px; text-align: center; border-radius: 5px 5px 0 0; }
+            .content { background: #f9fafb; padding: 30px; border-radius: 0 0 5px 5px; }
+            .button { display: inline-block; padding: 14px 28px; background: #4F46E5; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: bold; }
+            .info-box { background: #EFF6FF; border-left: 4px solid #3B82F6; padding: 15px; margin: 15px 0; border-radius: 5px; }
+            .warning { background: #FEF3C7; border-left: 4px solid #F59E0B; padding: 15px; margin: 15px 0; border-radius: 5px; }
+            .token-box { background: #E5E7EB; padding: 15px; border-radius: 5px; margin: 15px 0; word-break: break-all; font-family: monospace; font-size: 12px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>🎉 Admin Invitation</h1>
+              <p style="margin: 10px 0 0 0; font-size: 16px;">You've been invited to join Rentify</p>
+            </div>
+            <div class="content">
+              <p>Hello ${invitation.name},</p>
+              
+              <p>You have been invited by <strong>${inviterName}</strong> to join <strong>Rentify</strong> as an administrator.</p>
+              
+              <div class="info-box">
+                <strong>📋 What you'll be able to do:</strong>
+                <ul style="margin: 10px 0; padding-left: 20px;">
+                  <li>Manage users and listings</li>
+                  <li>Oversee bookings and transactions</li>
+                  <li>Manage categories and platform settings</li>
+                  <li>Invite other administrators</li>
+                </ul>
+              </div>
+              
+              <p>Click the button below to accept the invitation and create your admin account:</p>
+              <div style="text-align: center;">
+                <a href="${invitationUrl}" class="button">Accept Invitation</a>
+              </div>
+              
+              <p>Or copy and paste this link into your browser:</p>
+              <div class="token-box">${invitationUrl}</div>
+              
+              <div class="warning">
+                <strong>⚠️ Important:</strong>
+                <ul style="margin: 10px 0; padding-left: 20px;">
+                  <li>This invitation will expire on ${new Date(invitation.expiresAt).toLocaleDateString()}</li>
+                  <li>You must use the email address: <strong>${invitation.email}</strong></li>
+                  <li>If you didn't expect this invitation, please ignore this email</li>
+                </ul>
+              </div>
+              
+              <p>Once you accept the invitation, you'll be able to set up your admin account with a secure password.</p>
+              
+              <p>Best regards,<br>The Rentify Team</p>
+              
+              <hr style="border: none; border-top: 1px solid #E5E7EB; margin: 30px 0;" />
+              <p style="font-size: 12px; color: #6B7280; text-align: center;">
+                This is an automated message. Please do not reply to this email.
+              </p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `,
+  }),
 };
 
 module.exports = {

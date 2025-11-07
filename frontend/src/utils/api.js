@@ -113,6 +113,7 @@ export const getAdminStats = () => api.get('/admin/stats')
 // Admin Invitation API
 export const createAdminInvitation = (invitationData) => api.post('/admin/invitations', invitationData)
 export const getAdminInvitations = () => api.get('/admin/invitations')
+export const resendAdminInvitation = (invitationId) => api.post(`/admin/invitations/${invitationId}/resend`)
 export const revokeAdminInvitation = (invitationId) => api.delete(`/admin/invitations/${invitationId}`)
 export const registerAdmin = (adminData) => api.post('/admin/register-admin', adminData)
 export const validateInvitationToken = (token) => api.get(`/admin/validate-invitation/${token}`)

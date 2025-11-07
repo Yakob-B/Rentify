@@ -10,9 +10,11 @@ import {
   ExclamationTriangleIcon,
   CheckCircleIcon,
   XCircleIcon,
-  XMarkIcon
+  XMarkIcon,
+  ClipboardDocumentIcon,
+  PaperAirplaneIcon
 } from '@heroicons/react/24/outline'
-import { getAllBookings, createAdminInvitation, getAdminInvitations, revokeAdminInvitation, updateBookingStatus, getAdminStats } from '../utils/api'
+import { getAllBookings, createAdminInvitation, getAdminInvitations, resendAdminInvitation, revokeAdminInvitation, updateBookingStatus, getAdminStats } from '../utils/api'
 import UserManagement from '../components/UserManagement'
 
 const AdminPanel = () => {
@@ -121,6 +123,24 @@ const AdminPanel = () => {
     }
   }
 
+  const handleResendInvitation = async (id) => {
+    try {
+      await resendAdminInvitation(id)
+      toast.success('Invitation resent successfully')
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Failed to resend invitation'))
+    }
+  }
+
+  const handleCopyInvitationLink = (token) => {
+    const invitationUrl = `${window.location.origin}/admin/register/${token}`
+    navigator.clipboard.writeText(invitationUrl).then(() => {
+      toast.success('Invitation link copied to clipboard!')
+    }).catch(() => {
+      toast.error('Failed to copy link')
+    })
+  }
+
   const handleRevokeInvitation = async (id) => {
     if (!window.confirm('Revoke this invitation?')) return
     try {
@@ -136,11 +156,11 @@ const AdminPanel = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800'
-      case 'used': return 'bg-green-100 text-green-800'
-      case 'expired': return 'bg-red-100 text-red-800'
-      case 'revoked': return 'bg-gray-100 text-gray-800'
-      default: return 'bg-gray-100 text-gray-800'
+      case 'pending': return 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200'
+      case 'used': return 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'
+      case 'expired': return 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200'
+      case 'revoked': return 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200'
+      default: return 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200'
     }
   }
 
@@ -510,18 +530,21 @@ const AdminPanel = () => {
   const renderAdminInvitations = () => {
     return (
       <div className="space-y-6">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="p-6 border-b border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900">Send Admin Invitation</h3>
+        <div className="bg-white dark:bg-black rounded-lg shadow-sm border border-gray-200 dark:border-gray-800">
+          <div className="p-6 border-b border-gray-200 dark:border-gray-800">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Send Admin Invitation</h3>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              Invite a new administrator to join your platform. An email will be sent automatically.
+            </p>
           </div>
           <div className="p-6">
-            <form onSubmit={handleInvitationSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <form onSubmit={handleInvitationSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <input
                 value={invitationForm.name}
                 onChange={(e) => setInvitationForm({ ...invitationForm, name: e.target.value })}
                 placeholder="Full Name"
                 required
-                className="input-field"
+                className="input-field dark:bg-gray-900 dark:border-gray-700 dark:text-white"
               />
               <input
                 value={invitationForm.email}
@@ -529,77 +552,117 @@ const AdminPanel = () => {
                 placeholder="Email Address"
                 type="email"
                 required
-                className="input-field"
+                className="input-field dark:bg-gray-900 dark:border-gray-700 dark:text-white"
               />
               <button 
                 type="submit" 
                 disabled={savingInvitation} 
-                className="btn-primary whitespace-nowrap disabled:opacity-50"
+                className="btn-primary whitespace-nowrap disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                {savingInvitation ? 'Sending...' : 'Send Invitation'}
+                {savingInvitation ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <span>Sending...</span>
+                  </>
+                ) : (
+                  <>
+                    <PaperAirplaneIcon className="w-4 h-4" />
+                    <span>Send Invitation</span>
+                  </>
+                )}
               </button>
             </form>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="p-6 border-b border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900">Admin Invitations</h3>
+        <div className="bg-white dark:bg-black rounded-lg shadow-sm border border-gray-200 dark:border-gray-800">
+          <div className="p-6 border-b border-gray-200 dark:border-gray-800">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Admin Invitations</h3>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              {invitations.length} invitation{invitations.length !== 1 ? 's' : ''} total
+            </p>
           </div>
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+              <thead className="bg-gray-50 dark:bg-gray-900">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Invited By</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expires</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Name</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Email</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Invited By</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Expires</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white dark:bg-black divide-y divide-gray-200 dark:divide-gray-800">
                 {loadingInvites ? (
                   <tr>
-                    <td colSpan="6" className="px-6 py-4">Loading...</td>
+                    <td colSpan="6" className="px-6 py-4 text-center text-gray-500 dark:text-gray-400">Loading...</td>
                   </tr>
                 ) : invitations.length ? (
-                  invitations.map((inv) => (
-                    <tr key={inv._id}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{inv.name}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{inv.email}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(inv.status)}`}>
-                          {inv.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{inv.invitedBy?.name}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                        {new Date(inv.expiresAt).toLocaleDateString()}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        {inv.status === 'pending' && (
-                          <button 
-                            onClick={() => handleRevokeInvitation(inv._id)} 
-                            className="text-red-600 hover:text-red-900"
-                          >
-                            Revoke
-                          </button>
-                        )}
-                        {inv.status === 'pending' && (
-                          <div className="mt-1">
-                            <p className="text-xs text-gray-500">Invitation Link:</p>
-                            <p className="text-xs font-mono bg-gray-100 p-1 rounded">
-                              {window.location.origin}/admin/register/{inv.token}
-                            </p>
-                          </div>
-                        )}
-                      </td>
-                    </tr>
-                  ))
+                  invitations.map((inv) => {
+                    const isExpired = new Date(inv.expiresAt) < new Date()
+                    const invitationUrl = `${window.location.origin}/admin/register/${inv.token}`
+                    
+                    return (
+                      <tr key={inv._id} className="hover:bg-gray-50 dark:hover:bg-gray-900">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{inv.name}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{inv.email}</td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(inv.status)}`}>
+                            {inv.status}
+                            {isExpired && inv.status === 'pending' && ' (Expired)'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{inv.invitedBy?.name || '—'}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                          {new Date(inv.expiresAt).toLocaleDateString()}
+                          {isExpired && inv.status === 'pending' && (
+                            <span className="ml-1 text-red-500 text-xs">(Expired)</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          {inv.status === 'pending' && (
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => handleCopyInvitationLink(inv.token)}
+                                className="inline-flex items-center gap-1 px-3 py-1 text-xs bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                                title="Copy invitation link"
+                              >
+                                <ClipboardDocumentIcon className="w-4 h-4" />
+                                Copy Link
+                              </button>
+                              <button
+                                onClick={() => handleResendInvitation(inv._id)}
+                                className="inline-flex items-center gap-1 px-3 py-1 text-xs bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 rounded hover:bg-primary-200 dark:hover:bg-primary-800 transition-colors"
+                                title="Resend invitation email"
+                              >
+                                <PaperAirplaneIcon className="w-4 h-4" />
+                                Resend
+                              </button>
+                              <button
+                                onClick={() => handleRevokeInvitation(inv._id)}
+                                className="inline-flex items-center gap-1 px-3 py-1 text-xs bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded hover:bg-red-200 dark:hover:bg-red-800 transition-colors"
+                                title="Revoke invitation"
+                              >
+                                Revoke
+                              </button>
+                            </div>
+                          )}
+                          {inv.status === 'used' && inv.usedBy && (
+                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                              Used by {inv.usedBy.name || 'Admin'}
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    )
+                  })
                 ) : (
                   <tr>
-                    <td colSpan="6" className="px-6 py-4 text-center text-gray-500">No invitations</td>
+                    <td colSpan="6" className="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
+                      No invitations yet. Send your first invitation above.
+                    </td>
                   </tr>
                 )}
               </tbody>

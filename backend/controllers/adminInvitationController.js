@@ -2,6 +2,7 @@ const AdminInvitation = require('../models/adminInvitationModel');
 const User = require('../models/userModel');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const { sendEmail, emailTemplates } = require('../utils/email');
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -35,12 +36,36 @@ const createAdminInvitation = async (req, res) => {
       });
     }
 
+    // Get inviter details
+    const inviter = await User.findById(req.user.id);
+
     // Create invitation
     const invitation = await AdminInvitation.create({
       email,
       name,
       invitedBy: req.user.id
     });
+
+    // Generate invitation URL
+    const invitationUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/admin/register/${invitation.token}`;
+
+    // Send invitation email
+    try {
+      const emailData = emailTemplates.adminInvitation(
+        invitation,
+        inviter.name || 'Admin',
+        invitationUrl
+      );
+      await sendEmail({
+        to: invitation.email,
+        subject: emailData.subject,
+        html: emailData.html
+      });
+      console.log(`Admin invitation email sent to: ${invitation.email}`);
+    } catch (emailError) {
+      console.error('Failed to send invitation email:', emailError);
+      // Continue even if email fails - invitation is still created
+    }
 
     res.status(201).json({
       message: 'Admin invitation sent successfully',
@@ -49,7 +74,8 @@ const createAdminInvitation = async (req, res) => {
         email: invitation.email,
         name: invitation.name,
         expiresAt: invitation.expiresAt,
-        token: invitation.token // In production, this should be sent via email
+        token: invitation.token,
+        invitationUrl: invitationUrl
       }
     });
 
@@ -105,6 +131,66 @@ const revokeAdminInvitation = async (req, res) => {
     console.error('Revoke admin invitation error:', error);
     res.status(500).json({ 
       message: error.message || 'Failed to revoke admin invitation' 
+    });
+  }
+};
+
+// @desc    Resend admin invitation
+// @route   POST /api/admin/invitations/:id/resend
+// @access  Private (Admin only)
+const resendAdminInvitation = async (req, res) => {
+  try {
+    const invitation = await AdminInvitation.findById(req.params.id)
+      .populate('invitedBy', 'name email');
+    
+    if (!invitation) {
+      return res.status(404).json({ message: 'Invitation not found' });
+    }
+
+    if (invitation.status !== 'pending') {
+      return res.status(400).json({ 
+        message: 'Can only resend pending invitations' 
+      });
+    }
+
+    // Check if invitation is expired
+    if (invitation.expiresAt < new Date()) {
+      return res.status(400).json({ 
+        message: 'Invitation has expired. Please create a new invitation.' 
+      });
+    }
+
+    // Generate invitation URL
+    const invitationUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/admin/register/${invitation.token}`;
+
+    // Send invitation email
+    try {
+      const emailData = emailTemplates.adminInvitation(
+        invitation,
+        invitation.invitedBy?.name || 'Admin',
+        invitationUrl
+      );
+      await sendEmail({
+        to: invitation.email,
+        subject: emailData.subject,
+        html: emailData.html
+      });
+      console.log(`Admin invitation email resent to: ${invitation.email}`);
+    } catch (emailError) {
+      console.error('Failed to resend invitation email:', emailError);
+      return res.status(500).json({ 
+        message: 'Failed to send invitation email. Invitation is still valid.' 
+      });
+    }
+
+    res.json({ 
+      message: 'Admin invitation resent successfully',
+      invitationUrl: invitationUrl
+    });
+  } catch (error) {
+    console.error('Resend admin invitation error:', error);
+    res.status(500).json({ 
+      message: error.message || 'Failed to resend admin invitation' 
     });
   }
 };
@@ -264,6 +350,7 @@ module.exports = {
   createAdminInvitation,
   getAdminInvitations,
   revokeAdminInvitation,
+  resendAdminInvitation,
   registerAdmin,
   validateInvitationToken
 };

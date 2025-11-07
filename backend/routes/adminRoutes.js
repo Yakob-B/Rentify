@@ -3,6 +3,7 @@ const {
   createAdminInvitation,
   getAdminInvitations,
   revokeAdminInvitation,
+  resendAdminInvitation,
   registerAdmin,
   validateInvitationToken
 } = require('../controllers/adminInvitationController');
@@ -17,6 +18,7 @@ router.get('/stats', protect, adminOnly, getAdminStats);
 // Admin invitation management routes (Admin only)
 router.post('/invitations', protect, adminOnly, createAdminInvitation);
 router.get('/invitations', protect, adminOnly, getAdminInvitations);
+router.post('/invitations/:id/resend', protect, adminOnly, resendAdminInvitation);
 router.delete('/invitations/:id', protect, adminOnly, revokeAdminInvitation);
 
 // Public admin registration routes
