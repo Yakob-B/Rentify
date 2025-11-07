@@ -1,12 +1,16 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
 const User = require('../models/userModel');
 require('dotenv').config();
 
 // Connect to database
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.DB_URI);
+    const dbUri = process.env.DB_URI || process.env.MONGODB_URI;
+    if (!dbUri) {
+      console.error('❌ Error: DB_URI or MONGODB_URI environment variable is required');
+      process.exit(1);
+    }
+    const conn = await mongoose.connect(dbUri);
     console.log(`MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
     console.error(`Error: ${error.message}`);
@@ -46,15 +50,12 @@ const createFirstAdmin = async () => {
       process.exit(0);
     }
 
-    // Hash password
-    const salt = await bcrypt.genSalt(12);
-    const hashedPassword = await bcrypt.hash(adminPassword, salt);
-
-    // Create admin user
+    // Create admin user - password will be automatically hashed by User model pre-save hook
+    // DO NOT hash the password manually - User.create() will handle it
     const admin = await User.create({
       name: adminName,
       email: adminEmail,
-      password: hashedPassword,
+      password: adminPassword, // Pass plain password, model will hash it
       role: 'admin'
     });
 
