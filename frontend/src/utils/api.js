@@ -57,7 +57,12 @@ export const getListings = (params = {}) => {
   const queryParams = new URLSearchParams(params).toString()
   return api.get(`/listings${queryParams ? `?${queryParams}` : ''}`)
 }
-export const getListingById = (id) => api.get(`/listings/${id}`)
+export const getListingById = (id) => {
+  if (!id || id === 'undefined' || id === 'null') {
+    return Promise.reject(new Error('Invalid listing ID'))
+  }
+  return api.get(`/listings/${id}`)
+}
 export const createListing = (listingData) => api.post('/listings', listingData)
 export const updateListing = (id, listingData) => api.put(`/listings/${id}`, listingData)
 export const deleteListing = (id) => api.delete(`/listings/${id}`)

@@ -160,7 +160,20 @@ const getNearbyListings = async (req, res) => {
 // @access  Public
 const getListingById = async (req, res) => {
   try {
-    const listing = await Listing.findById(req.params.id)
+    const { id } = req.params;
+
+    // Validate ID
+    if (!id || id === 'undefined' || id === 'null') {
+      return res.status(400).json({ message: 'Invalid listing ID' });
+    }
+
+    // Check if ID is a valid MongoDB ObjectId format
+    const mongoose = require('mongoose');
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'Invalid listing ID format' });
+    }
+
+    const listing = await Listing.findById(id)
       .populate('category', 'name icon')
       .populate('owner', 'name email phone avatar');
 
@@ -174,7 +187,12 @@ const getListingById = async (req, res) => {
       res.status(404).json({ message: 'Listing not found' });
     }
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Get listing by ID error:', error);
+    // Check if it's a CastError (invalid ObjectId)
+    if (error.name === 'CastError') {
+      return res.status(400).json({ message: 'Invalid listing ID format' });
+    }
+    res.status(500).json({ message: error.message || 'Failed to fetch listing' });
   }
 };
 

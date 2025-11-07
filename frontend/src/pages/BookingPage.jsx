@@ -31,6 +31,14 @@ const BookingPage = () => {
   const endDate = watch('endDate')
 
   useEffect(() => {
+    // Validate ID before making API call
+    if (!id || id === 'undefined' || id === 'null') {
+      setLoading(false)
+      toast.error('Invalid listing ID')
+      navigate('/listings')
+      return
+    }
+
     const fetchListing = async () => {
       try {
         const listingData = await getListingById(id)
@@ -38,13 +46,14 @@ const BookingPage = () => {
       } catch (error) {
         console.error('Error fetching listing:', error)
         toast.error(getErrorMessage(error, 'Error loading listing details'))
+        navigate('/listings')
       } finally {
         setLoading(false)
       }
     }
 
     fetchListing()
-  }, [id])
+  }, [id, navigate])
 
   const calculateTotal = () => {
     if (!startDate || !endDate || !listing) return 0

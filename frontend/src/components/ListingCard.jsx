@@ -11,6 +11,10 @@ import FavoriteButton from './FavoriteButton'
 import LazyImage from './LazyImage'
 
 const ListingCard = ({ listing }) => {
+  // Validate listing and ID
+  if (!listing || !listing._id) {
+    return null
+  }
 
   const formatPrice = (price, unit) => {
     return `$${price}/${unit}`

@@ -23,6 +23,14 @@ const ListingDetails = () => {
   const user = JSON.parse(localStorage.getItem('user') || 'null')
 
   useEffect(() => {
+    // Validate ID before making API call
+    if (!id || id === 'undefined') {
+      setLoading(false)
+      setListing(null)
+      toast.error('Invalid listing ID')
+      return
+    }
+
     const run = async () => {
       setLoading(true)
       try {

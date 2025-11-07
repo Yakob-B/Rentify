@@ -222,7 +222,7 @@ const MessagesPage = () => {
                             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                               {otherUser?.name || 'Unknown User'}
                             </h3>
-                            {selectedConversation.listing && (
+                            {selectedConversation.listing && selectedConversation.listing._id && (
                               <Link
                                 to={`/listings/${selectedConversation.listing._id}`}
                                 className="text-sm text-primary-600 dark:text-white hover:text-primary-700 dark:hover:text-gray-300"
