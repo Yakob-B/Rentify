@@ -24,6 +24,8 @@ import ListingDetails from './pages/ListingDetails'
 import About from './pages/About'
 import MessagesPage from './pages/MessagesPage'
 import FavoritesPage from './pages/FavoritesPage'
+import ForgotPasswordPage from './pages/ForgotPasswordPage'
+import ResetPasswordPage from './pages/ResetPasswordPage'
 
 const ProtectedRoute = ({ children, roles }) => {
   const token = localStorage.getItem('token')
@@ -55,6 +57,8 @@ function App() {
               <Route path="/listings/:id" element={<ListingDetails />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route path="/admin/register/:token" element={<AdminRegisterPage />} />
               <Route path="/admin/register" element={<AdminRegisterPage />} />
               <Route

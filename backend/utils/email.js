@@ -253,6 +253,58 @@ const emailTemplates = {
       </html>
     `,
   }),
+
+  passwordReset: (user, resetUrl) => ({
+    subject: 'Reset Your Password - Rentify',
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: #4F46E5; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }
+            .content { background: #f9fafb; padding: 20px; border-radius: 0 0 5px 5px; }
+            .button { display: inline-block; padding: 12px 24px; background: #4F46E5; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+            .warning { background: #FEF3C7; border-left: 4px solid #F59E0B; padding: 15px; margin: 15px 0; border-radius: 5px; }
+            .token-box { background: #E5E7EB; padding: 15px; border-radius: 5px; margin: 15px 0; word-break: break-all; font-family: monospace; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>Reset Your Password</h1>
+            </div>
+            <div class="content">
+              <p>Hello ${user.name},</p>
+              <p>We received a request to reset your password for your Rentify account.</p>
+              
+              <p>Click the button below to reset your password:</p>
+              <div style="text-align: center;">
+                <a href="${resetUrl}" class="button">Reset Password</a>
+              </div>
+              
+              <p>Or copy and paste this link into your browser:</p>
+              <div class="token-box">${resetUrl}</div>
+              
+              <div class="warning">
+                <strong>⚠️ Important:</strong>
+                <ul style="margin: 10px 0; padding-left: 20px;">
+                  <li>This link will expire in 1 hour</li>
+                  <li>If you didn't request this, please ignore this email</li>
+                  <li>Your password will not change until you click the link and create a new one</li>
+                </ul>
+              </div>
+              
+              <p>For security reasons, if you didn't request this password reset, please contact our support team immediately.</p>
+              
+              <p>Best regards,<br>The Rentify Team</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `,
+  }),
 };
 
 module.exports = {
