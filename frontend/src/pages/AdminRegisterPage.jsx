@@ -13,23 +13,28 @@ const AdminRegisterPage = () => {
     email: '',
     password: '',
     confirmPassword: '',
-    invitationToken: token
+    invitationToken: token || '',
+    adminSecret: ''
   })
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [showAdminSecret, setShowAdminSecret] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [validating, setValidating] = useState(true)
+  const [validating, setValidating] = useState(!!token)
   const [invitationValid, setInvitationValid] = useState(false)
   const [invitationData, setInvitationData] = useState(null)
+  const [isFirstAdmin, setIsFirstAdmin] = useState(false)
 
   useEffect(() => {
     const validateInvitation = async () => {
+      // If no token, check if this is first admin registration
       if (!token) {
-        toast.error('No invitation token provided')
-        navigate('/login')
+        setIsFirstAdmin(true)
+        setValidating(false)
         return
       }
 
+      // Validate invitation token
       try {
         const response = await validateInvitationToken(token)
         setInvitationValid(true)
@@ -40,8 +45,10 @@ const AdminRegisterPage = () => {
           email: response.email
         }))
       } catch (error) {
-        toast.error('Invalid or expired invitation token')
-        navigate('/login')
+        // If validation fails, might be first admin scenario
+        // Don't redirect immediately, allow user to try with secret
+        console.log('Invitation validation failed, allowing first admin registration')
+        setIsFirstAdmin(true)
       } finally {
         setValidating(false)
       }
@@ -70,16 +77,36 @@ const AdminRegisterPage = () => {
       return
     }
 
+    // For first admin, adminSecret is required
+    if (isFirstAdmin && !formData.invitationToken && !formData.adminSecret) {
+      toast.error('Admin secret is required to create the first admin account')
+      return
+    }
+
     setLoading(true)
 
     try {
-      const response = await registerAdmin(formData)
+      // Prepare registration data
+      const registrationData = {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password
+      }
+
+      // Add either invitationToken or adminSecret
+      if (formData.invitationToken) {
+        registrationData.invitationToken = formData.invitationToken
+      } else if (formData.adminSecret) {
+        registrationData.adminSecret = formData.adminSecret
+      }
+
+      const response = await registerAdmin(registrationData)
       
       // Store user data and token
       localStorage.setItem('token', response.token)
       localStorage.setItem('user', JSON.stringify(response.user))
       
-      toast.success('Admin account created successfully!')
+      toast.success(response.message || 'Admin account created successfully!')
       navigate('/admin')
     } catch (error) {
       toast.error(getErrorMessage(error, 'Admin registration failed'))
@@ -90,22 +117,23 @@ const AdminRegisterPage = () => {
 
   if (validating) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-black flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Validating invitation...</p>
+          <p className="mt-4 text-gray-600 dark:text-gray-300">Validating invitation...</p>
         </div>
       </div>
     )
   }
 
-  if (!invitationValid) {
+  // Show first admin registration form if no valid invitation
+  if (!invitationValid && !isFirstAdmin) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-black flex items-center justify-center">
         <div className="text-center">
           <ShieldCheckIcon className="w-16 h-16 text-red-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Invalid Invitation</h2>
-          <p className="text-gray-600 mb-6">This invitation link is invalid or has expired.</p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Invalid Invitation</h2>
+          <p className="text-gray-600 dark:text-gray-300 mb-6">This invitation link is invalid or has expired.</p>
           <Link to="/login" className="btn-primary">
             Go to Login
           </Link>
@@ -115,42 +143,97 @@ const AdminRegisterPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-black flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
           <div className="w-12 h-12 bg-primary-600 rounded-lg flex items-center justify-center">
             <ShieldCheckIcon className="w-8 h-8 text-white" />
           </div>
         </div>
-        <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
-          Create Admin Account
+        <h2 className="mt-6 text-center text-3xl font-bold text-gray-900 dark:text-white">
+          {isFirstAdmin ? 'Create First Admin Account' : 'Create Admin Account'}
         </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
-          You've been invited to join Rentify as an administrator
+        <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-300">
+          {isFirstAdmin 
+            ? 'Create the first administrator account for Rentify'
+            : "You've been invited to join Rentify as an administrator"}
         </p>
-        <div className="mt-4 bg-green-50 border border-green-200 rounded-md p-4">
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <ShieldCheckIcon className="h-5 w-5 text-green-400" />
-            </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-green-800">
-                Invitation Valid
-              </h3>
-              <div className="mt-2 text-sm text-green-700">
-                <p>Email: {invitationData?.email}</p>
-                <p>Expires: {new Date(invitationData?.expiresAt).toLocaleDateString()}</p>
+        {invitationValid && invitationData && (
+          <div className="mt-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md p-4">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <ShieldCheckIcon className="h-5 w-5 text-green-400" />
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-green-800 dark:text-green-300">
+                  Invitation Valid
+                </h3>
+                <div className="mt-2 text-sm text-green-700 dark:text-green-400">
+                  <p>Email: {invitationData?.email}</p>
+                  <p>Expires: {new Date(invitationData?.expiresAt).toLocaleDateString()}</p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
+        {isFirstAdmin && !invitationValid && (
+          <div className="mt-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md p-4">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <ShieldCheckIcon className="h-5 w-5 text-yellow-400" />
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-300">
+                  First Admin Setup
+                </h3>
+                <div className="mt-2 text-sm text-yellow-700 dark:text-yellow-400">
+                  <p>No admins found. Enter the admin secret to create the first admin account.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+        <div className="bg-white dark:bg-black py-8 px-4 shadow sm:rounded-lg sm:px-10 border dark:border-gray-800">
           <form className="space-y-6" onSubmit={handleSubmit}>
+            {isFirstAdmin && !invitationValid && (
+              <div>
+                <label htmlFor="adminSecret" className="block text-sm font-medium text-gray-700 dark:text-white">
+                  Admin Secret
+                </label>
+                <div className="mt-1 relative">
+                  <input
+                    id="adminSecret"
+                    name="adminSecret"
+                    type={showAdminSecret ? 'text' : 'password'}
+                    required
+                    value={formData.adminSecret}
+                    onChange={handleChange}
+                    className="input-field pr-10"
+                    placeholder="Enter admin secret key"
+                  />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    onClick={() => setShowAdminSecret(!showAdminSecret)}
+                  >
+                    {showAdminSecret ? (
+                      <EyeSlashIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+                    ) : (
+                      <EyeIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+                    )}
+                  </button>
+                </div>
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  Required to create the first admin account. Set FIRST_ADMIN_SECRET environment variable.
+                </p>
+              </div>
+            )}
+
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-white">
                 Full Name
               </label>
               <div className="mt-1">
@@ -162,14 +245,14 @@ const AdminRegisterPage = () => {
                   required
                   value={formData.name}
                   onChange={handleChange}
-                  className="input-field dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
+                  className="input-field"
                   placeholder="Enter your full name"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-white">
                 Email address
               </label>
               <div className="mt-1">
@@ -181,18 +264,20 @@ const AdminRegisterPage = () => {
                   required
                   value={formData.email}
                   onChange={handleChange}
-                  className="input-field dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100 bg-gray-100"
+                  className={`input-field ${invitationValid ? 'bg-gray-100 dark:bg-gray-900' : ''}`}
                   placeholder="Enter your email"
-                  readOnly
+                  readOnly={invitationValid}
                 />
-                <p className="mt-1 text-xs text-gray-500">
-                  Email is pre-filled from invitation
-                </p>
+                {invitationValid && (
+                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    Email is pre-filled from invitation
+                  </p>
+                )}
               </div>
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-white">
                 Password
               </label>
               <div className="mt-1 relative">
@@ -204,7 +289,7 @@ const AdminRegisterPage = () => {
                   required
                   value={formData.password}
                   onChange={handleChange}
-                  className="input-field pr-10 dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
+                  className="input-field pr-10"
                   placeholder="Create a secure password"
                 />
                 <button
@@ -213,19 +298,19 @@ const AdminRegisterPage = () => {
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
-                    <EyeSlashIcon className="h-5 w-5 text-gray-400" />
+                    <EyeSlashIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                   ) : (
-                    <EyeIcon className="h-5 w-5 text-gray-400" />
+                    <EyeIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                   )}
                 </button>
               </div>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                 Must be at least 6 characters
               </p>
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-white">
                 Confirm Password
               </label>
               <div className="mt-1 relative">
@@ -237,7 +322,7 @@ const AdminRegisterPage = () => {
                   required
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  className="input-field pr-10 dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
+                  className="input-field pr-10"
                   placeholder="Confirm your password"
                 />
                 <button
@@ -246,9 +331,9 @@ const AdminRegisterPage = () => {
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 >
                   {showConfirmPassword ? (
-                    <EyeSlashIcon className="h-5 w-5 text-gray-400" />
+                    <EyeSlashIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                   ) : (
-                    <EyeIcon className="h-5 w-5 text-gray-400" />
+                    <EyeIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                   )}
                 </button>
               </div>
@@ -260,15 +345,15 @@ const AdminRegisterPage = () => {
                 name="agree-terms"
                 type="checkbox"
                 required
-                className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 dark:border-gray-700 rounded dark:bg-gray-900"
               />
-              <label htmlFor="agree-terms" className="ml-2 block text-sm text-gray-900">
+              <label htmlFor="agree-terms" className="ml-2 block text-sm text-gray-900 dark:text-white">
                 I agree to the{' '}
-                <a href="#" className="text-primary-600 hover:text-primary-500">
+                <a href="#" className="text-primary-600 hover:text-primary-500 dark:text-primary-400">
                   Terms of Service
                 </a>{' '}
                 and{' '}
-                <a href="#" className="text-primary-600 hover:text-primary-500">
+                <a href="#" className="text-primary-600 hover:text-primary-500 dark:text-primary-400">
                   Privacy Policy
                 </a>
               </label>
@@ -296,11 +381,11 @@ const AdminRegisterPage = () => {
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-gray-300">
               Already have an account?{' '}
               <Link
                 to="/login"
-                className="font-medium text-primary-600 hover:text-primary-500"
+                className="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400"
               >
                 Sign in
               </Link>

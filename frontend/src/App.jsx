@@ -56,6 +56,7 @@ function App() {
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/admin/register/:token" element={<AdminRegisterPage />} />
+              <Route path="/admin/register" element={<AdminRegisterPage />} />
               <Route
                 path="/messages"
                 element={

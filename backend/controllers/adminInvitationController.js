@@ -114,8 +114,67 @@ const revokeAdminInvitation = async (req, res) => {
 // @access  Public
 const registerAdmin = async (req, res) => {
   try {
-    const { name, email, password, invitationToken } = req.body;
+    const { name, email, password, invitationToken, adminSecret } = req.body;
 
+    // Check if any admin exists
+    const adminCount = await User.countDocuments({ role: 'admin' });
+    const isFirstAdmin = adminCount === 0;
+
+    // If no admins exist, allow creation with admin secret OR invitation token
+    if (isFirstAdmin) {
+      // First admin can be created with admin secret from environment
+      const requiredSecret = process.env.FIRST_ADMIN_SECRET || 'rentify-first-admin-2024';
+      
+      if (adminSecret && adminSecret === requiredSecret) {
+        // Create first admin with secret key (no invitation needed)
+        // Check if user already exists
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+          return res.status(400).json({ 
+            message: 'User with this email already exists' 
+          });
+        }
+
+        // Create first admin user
+        const user = await User.create({
+          name,
+          email,
+          password,
+          role: 'admin'
+        });
+
+        // Generate token
+        const token = generateToken(user._id);
+
+        console.log(`First admin created: ${email}`);
+
+        return res.status(201).json({
+          message: 'First admin account created successfully',
+          user: {
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role
+          },
+          token
+        });
+      } else if (!invitationToken) {
+        // No secret provided and no invitation token
+        return res.status(400).json({ 
+          message: 'Admin secret or invitation token required to create first admin. Please set FIRST_ADMIN_SECRET environment variable or use an invitation token.' 
+        });
+      }
+      // If invitation token is provided, continue with normal flow below
+    } else {
+      // If admins exist, invitation token is required
+      if (!invitationToken) {
+        return res.status(400).json({ 
+          message: 'Invitation token is required' 
+        });
+      }
+    }
+
+    // Normal admin registration flow (with invitation token)
     // Validate invitation token
     const invitation = await AdminInvitation.findValidByToken(invitationToken);
     if (!invitation) {
