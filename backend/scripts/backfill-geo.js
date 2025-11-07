@@ -27,6 +27,9 @@ async function run() {
     for (let doc = await cursor.next(); doc != null; doc = await cursor.next()) {
       const hasGeo = doc.geo && Array.isArray(doc.geo.coordinates) && doc.geo.coordinates.length === 2
       const hasLegacy = doc.location && doc.location.coordinates && typeof doc.location.coordinates.lat === 'number' && typeof doc.location.coordinates.lng === 'number'
+      
+      // Check if geo field exists but is incomplete (has type but no coordinates)
+      const hasIncompleteGeo = doc.geo && doc.geo.type === 'Point' && (!doc.geo.coordinates || !Array.isArray(doc.geo.coordinates) || doc.geo.coordinates.length !== 2)
 
       if (hasGeo) {
         skipped++
@@ -40,6 +43,14 @@ async function run() {
           coordinates: [Number(lng), Number(lat)],
           address: doc.location && doc.location.address ? doc.location.address : undefined
         }
+        await doc.save()
+        updated++
+        console.log(`✅ Updated listing: ${doc.title} (${doc._id})`)
+      } else if (hasIncompleteGeo) {
+        // If geo is incomplete and no legacy coordinates, set to null to remove invalid geo
+        // This prevents the "Can't extract geo keys" error
+        console.log(`⚠️  Listing ${doc._id} has incomplete geo field. Setting to null.`)
+        doc.geo = null
         await doc.save()
         updated++
       } else {

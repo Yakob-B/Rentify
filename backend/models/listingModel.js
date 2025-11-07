@@ -116,6 +116,42 @@ const listingSchema = new mongoose.Schema({
   timestamps: true
 });
 
+// Pre-save hook to populate geo.coordinates from location.coordinates
+listingSchema.pre('save', function(next) {
+  // If geo.coordinates is missing or invalid, try to populate from location.coordinates
+  if (!this.geo || !Array.isArray(this.geo.coordinates) || this.geo.coordinates.length !== 2) {
+    if (this.location && this.location.coordinates) {
+      const { lat, lng } = this.location.coordinates;
+      if (typeof lat === 'number' && typeof lng === 'number') {
+        // GeoJSON format: [longitude, latitude]
+        this.geo = {
+          type: 'Point',
+          coordinates: [Number(lng), Number(lat)],
+          address: this.location.address || this.geo?.address
+        };
+      } else {
+        // If geo exists but is incomplete (has type but no coordinates), remove it
+        // This prevents "Can't extract geo keys" errors
+        if (this.geo && this.geo.type && !this.geo.coordinates) {
+          this.geo = null;
+        }
+      }
+    } else {
+      // If no location coordinates and geo is incomplete, remove geo field
+      if (this.geo && this.geo.type && (!this.geo.coordinates || !Array.isArray(this.geo.coordinates) || this.geo.coordinates.length !== 2)) {
+        this.geo = null;
+      }
+    }
+  }
+  
+  // Ensure geo.type is set if geo exists
+  if (this.geo && this.geo.coordinates && !this.geo.type) {
+    this.geo.type = 'Point';
+  }
+  
+  next();
+});
+
 // Text index for search on title and description
 listingSchema.index({ title: 'text', description: 'text' });
 // 2dsphere index for geospatial queries

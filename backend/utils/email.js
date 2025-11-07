@@ -19,9 +19,10 @@ const createTransporter = () => {
 const sendEmail = async ({ to, subject, html, text }) => {
   try {
     // Skip email sending if email is not configured
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
-      console.log('Email not configured. Skipping email send to:', to);
+    if (!process.env.EMAIL_USER || (!process.env.EMAIL_PASSWORD && !process.env.EMAIL_APP_PASSWORD)) {
+      console.log('⚠️  Email not configured. Skipping email send to:', to);
       console.log('Subject:', subject);
+      console.log('Please set EMAIL_USER and EMAIL_PASSWORD (or EMAIL_APP_PASSWORD) environment variables.');
       return { success: true, skipped: true };
     }
 

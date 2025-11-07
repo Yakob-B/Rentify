@@ -112,9 +112,20 @@ const AdminPanel = () => {
     e.preventDefault()
     setSavingInvitation(true)
     try {
-      const created = await createAdminInvitation(invitationForm)
-      setInvitations(prev => [created.invitation, ...prev])
-      toast.success('Admin invitation sent successfully')
+      const response = await createAdminInvitation(invitationForm)
+      setInvitations(prev => [response.invitation, ...prev])
+      
+      if (response.emailSent) {
+        toast.success('Admin invitation created and email sent successfully!')
+      } else {
+        toast.error(
+          response.emailError || 'Email could not be sent. Please share the invitation link manually.',
+          { duration: 6000 }
+        )
+        console.warn('Email sending failed:', response.emailError)
+        console.log('Invitation URL:', response.invitation.invitationUrl)
+      }
+      
       setInvitationForm({ name: '', email: '' })
     } catch (err) {
       toast.error(getErrorMessage(err, 'Failed to send invitation'))
@@ -125,10 +136,16 @@ const AdminPanel = () => {
 
   const handleResendInvitation = async (id) => {
     try {
-      await resendAdminInvitation(id)
-      toast.success('Invitation resent successfully')
+      const response = await resendAdminInvitation(id)
+      toast.success('Invitation email resent successfully!')
     } catch (err) {
-      toast.error(getErrorMessage(err, 'Failed to resend invitation'))
+      const errorMessage = getErrorMessage(err, 'Failed to resend invitation')
+      toast.error(errorMessage, { duration: 6000 })
+      
+      // If email config error, show helpful message
+      if (err.response?.data?.message?.includes('not configured')) {
+        console.error('Email configuration error. Please check EMAIL_USER and EMAIL_PASSWORD environment variables.')
+      }
     }
   }
 
