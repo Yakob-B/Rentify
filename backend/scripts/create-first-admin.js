@@ -22,7 +22,7 @@ const createFirstAdmin = async () => {
     // Check if any admin exists
     const adminCount = await User.countDocuments({ role: 'admin' });
     if (adminCount > 0) {
-      console.log('Admin already exists. Exiting...');
+      console.log('Admin already exists here. Exiting...');
       process.exit(0);
     }
 
