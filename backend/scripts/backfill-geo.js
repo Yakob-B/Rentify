@@ -47,11 +47,12 @@ async function run() {
         updated++
         console.log(`✅ Updated listing: ${doc.title} (${doc._id})`)
       } else if (hasIncompleteGeo) {
-        // If geo is incomplete and no legacy coordinates, set to null to remove invalid geo
-        // This prevents the "Can't extract geo keys" error
-        console.log(`⚠️  Listing ${doc._id} has incomplete geo field. Setting to null.`)
-        doc.geo = null
-        await doc.save()
+        // If geo is incomplete and no legacy coordinates, remove it using undefined
+        // Using undefined prevents enum validation errors (null causes validation issues)
+        console.log(`⚠️  Listing ${doc._id} has incomplete geo field. Removing geo field.`)
+        doc.geo = undefined
+        // Use updateOne to properly remove the field
+        await Listing.updateOne({ _id: doc._id }, { $unset: { geo: '' } })
         updated++
       } else {
         skipped++

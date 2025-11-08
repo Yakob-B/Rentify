@@ -52,25 +52,10 @@ const listingSchema = new mongoose.Schema({
       lng: Number
     }
   },
-  // GeoJSON location for geospatial queries
+  // GeoJSON location for geospatial queries (optional - only set if coordinates are valid)
   geo: {
-    type: {
-      type: String,
-      enum: ['Point'],
-      default: 'Point'
-    },
-    coordinates: {
-      type: [Number], // [longitude, latitude]
-      validate: {
-        validator: function(v) {
-          return Array.isArray(v) && v.length === 2;
-        },
-        message: 'coordinates must be an array of [lng, lat]'
-      }
-    },
-    address: {
-      type: String
-    }
+    type: mongoose.Schema.Types.Mixed, // Use Mixed to allow flexible handling
+    default: undefined
   },
   images: [{
     type: String,
@@ -116,45 +101,80 @@ const listingSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Pre-save hook to populate geo.coordinates from location.coordinates
-listingSchema.pre('save', function(next) {
-  // If geo.coordinates is missing or invalid, try to populate from location.coordinates
-  if (!this.geo || !Array.isArray(this.geo.coordinates) || this.geo.coordinates.length !== 2) {
-    if (this.location && this.location.coordinates) {
-      const { lat, lng } = this.location.coordinates;
-      if (typeof lat === 'number' && typeof lng === 'number') {
-        // GeoJSON format: [longitude, latitude]
-        this.geo = {
-          type: 'Point',
-          coordinates: [Number(lng), Number(lat)],
-          address: this.location.address || this.geo?.address
-        };
-      } else {
-        // If geo exists but is incomplete (has type but no coordinates), remove it
-        // This prevents "Can't extract geo keys" errors
-        if (this.geo && this.geo.type && !this.geo.coordinates) {
-          this.geo = null;
-        }
-      }
-    } else {
-      // If no location coordinates and geo is incomplete, remove geo field
-      if (this.geo && this.geo.type && (!this.geo.coordinates || !Array.isArray(this.geo.coordinates) || this.geo.coordinates.length !== 2)) {
-        this.geo = null;
-      }
-    }
+// Custom validation for geo field
+listingSchema.path('geo').validate(function(value) {
+  // If geo is undefined, null, or not set, it's valid (field is optional)
+  if (value === undefined || value === null) {
+    return true;
   }
   
-  // Ensure geo.type is set if geo exists
-  if (this.geo && this.geo.coordinates && !this.geo.type) {
-    this.geo.type = 'Point';
+  // If geo exists, it must have valid structure
+  if (typeof value !== 'object') {
+    return false;
   }
+  
+  // Check if coordinates are valid
+  if (!Array.isArray(value.coordinates) || value.coordinates.length !== 2) {
+    return false;
+  }
+  
+  const [lng, lat] = value.coordinates;
+  if (typeof lng !== 'number' || typeof lat !== 'number' || isNaN(lng) || isNaN(lat)) {
+    return false;
+  }
+  
+  // Check type if provided
+  if (value.type !== undefined && value.type !== 'Point') {
+    return false;
+  }
+  
+  return true;
+}, 'Geo must be a valid GeoJSON Point with coordinates [lng, lat] or undefined/null');
+
+// Pre-save hook to populate geo.coordinates from location.coordinates
+listingSchema.pre('save', function(next) {
+  // Check if geo is valid
+  const hasValidGeo = this.geo && 
+    typeof this.geo === 'object' &&
+    Array.isArray(this.geo.coordinates) && 
+    this.geo.coordinates.length === 2 &&
+    typeof this.geo.coordinates[0] === 'number' &&
+    typeof this.geo.coordinates[1] === 'number' &&
+    !isNaN(this.geo.coordinates[0]) &&
+    !isNaN(this.geo.coordinates[1]);
+
+  if (hasValidGeo) {
+    // Geo is valid, ensure type is set
+    if (!this.geo.type) {
+      this.geo.type = 'Point';
+    }
+    return next();
+  }
+
+  // Geo is invalid or missing, try to populate from location.coordinates
+  if (this.location && this.location.coordinates) {
+    const { lat, lng } = this.location.coordinates;
+    if (typeof lat === 'number' && typeof lng === 'number' && !isNaN(lat) && !isNaN(lng)) {
+      // GeoJSON format: [longitude, latitude]
+      this.geo = {
+        type: 'Point',
+        coordinates: [Number(lng), Number(lat)],
+        address: this.location.address || (this.geo && this.geo.address ? this.geo.address : undefined)
+      };
+      return next();
+    }
+  }
+
+  // If we get here, geo is invalid and cannot be populated
+  // Set to undefined to remove it (MongoDB will unset the field)
+  this.geo = undefined;
   
   next();
 });
 
 // Text index for search on title and description
 listingSchema.index({ title: 'text', description: 'text' });
-// 2dsphere index for geospatial queries
-listingSchema.index({ geo: '2dsphere' });
+// 2dsphere index for geospatial queries (sparse index - only indexes documents with geo field)
+listingSchema.index({ geo: '2dsphere' }, { sparse: true });
 
 module.exports = mongoose.model('Listing', listingSchema);
