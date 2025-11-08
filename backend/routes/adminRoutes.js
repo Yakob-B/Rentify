@@ -8,12 +8,16 @@ const {
   validateInvitationToken
 } = require('../controllers/adminInvitationController');
 const { getAdminStats } = require('../controllers/adminStatsController');
+const { fixInvalidGeo } = require('../controllers/geoFixController');
 const { protect, adminOnly } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
 // Admin stats route (Admin only)
 router.get('/stats', protect, adminOnly, getAdminStats);
+
+// Geo fix route (Admin only) - Temporary endpoint to fix invalid geo fields
+router.post('/fix-geo', protect, adminOnly, fixInvalidGeo);
 
 // Admin invitation management routes (Admin only)
 router.post('/invitations', protect, adminOnly, createAdminInvitation);
