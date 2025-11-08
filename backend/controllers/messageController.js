@@ -3,9 +3,10 @@ const Message = require('../models/messageModel');
 const User = require('../models/userModel');
 const Listing = require('../models/listingModel');
 
-// @desc    Get or create conversation between users (optionally for a listing)
+// @desc    Create a new conversation between users (optionally for a listing)
 // @route   POST /api/messages/conversations
 // @access  Private
+// Note: Multiple conversations are now allowed per listing
 const getOrCreateConversation = async (req, res) => {
   try {
     const { recipientId, listingId } = req.body;
@@ -33,81 +34,25 @@ const getOrCreateConversation = async (req, res) => {
       }
     }
 
-    // Find or create conversation
-    // Sort participants to ensure consistent ordering for the index
+    // Always create a new conversation (multiple conversations per listing are allowed)
+    // Sort participants to ensure consistent ordering
     const participants = [userId, recipientId].sort();
     
-    // Build query - use exact match for participants array to match the index
-    const query = listingId 
-      ? { participants: participants, listing: listingId }
-      : { participants: participants, listing: null };
+    // Create new conversation
+    const conversation = await Conversation.create({
+      participants: participants,
+      listing: listingId || null
+    });
 
-    // Try to find existing conversation
-    let conversation = await Conversation.findOne(query)
+    // Populate and return the new conversation
+    const populatedConversation = await Conversation.findById(conversation._id)
       .populate('participants', 'name email avatar')
-      .populate('listing', 'title images')
-      .populate('lastMessage');
+      .populate('listing', 'title images');
 
-    if (!conversation) {
-      // Conversation doesn't exist, try to create it
-      try {
-        conversation = await Conversation.create({
-          participants: participants,
-          listing: listingId || null
-        });
-        conversation = await Conversation.findById(conversation._id)
-          .populate('participants', 'name email avatar')
-          .populate('listing', 'title images');
-      } catch (createError) {
-        // Handle duplicate key error (race condition - another request created it)
-        if (createError.code === 11000 || createError.name === 'MongoServerError') {
-          // Duplicate key error - conversation was created by another request
-          // Find and return the existing conversation
-          conversation = await Conversation.findOne(query)
-            .populate('participants', 'name email avatar')
-            .populate('listing', 'title images')
-            .populate('lastMessage');
-          
-          if (!conversation) {
-            // Still not found, might be a different error
-            throw createError;
-          }
-        } else {
-          // Different error, rethrow it
-          throw createError;
-        }
-      }
-    }
-
-    res.json(conversation);
+    res.status(201).json(populatedConversation);
   } catch (error) {
-    console.error('Get or create conversation error:', error);
-    
-    // Provide more helpful error messages
-    if (error.code === 11000) {
-      // Duplicate key error - try one more time to find it
-      try {
-        const { recipientId, listingId } = req.body;
-        const userId = req.user.id;
-        const participants = [userId, recipientId].sort();
-        const query = listingId 
-          ? { participants: participants, listing: listingId }
-          : { participants: participants, listing: null };
-        
-        const conversation = await Conversation.findOne(query)
-          .populate('participants', 'name email avatar')
-          .populate('listing', 'title images')
-          .populate('lastMessage');
-        
-        if (conversation) {
-          return res.json(conversation);
-        }
-      } catch (retryError) {
-        console.error('Retry failed:', retryError);
-      }
-    }
-    
-    res.status(500).json({ message: error.message || 'Failed to get or create conversation' });
+    console.error('Create conversation error:', error);
+    res.status(500).json({ message: error.message || 'Failed to create conversation' });
   }
 };
 
@@ -300,6 +245,15 @@ const markAsRead = async (req, res) => {
       return res.status(404).json({ message: 'Conversation not found' });
     }
 
+    // Verify user is a participant
+    const isParticipant = conversation.participants.some(
+      p => p.toString() === userId
+    );
+
+    if (!isParticipant) {
+      return res.status(403).json({ message: 'Not authorized to mark messages as read' });
+    }
+
     // Mark all messages as read
     await Message.updateMany(
       { conversation: id, sender: { $ne: userId }, read: false },
@@ -317,12 +271,48 @@ const markAsRead = async (req, res) => {
   }
 };
 
+// @desc    Delete a conversation
+// @route   DELETE /api/messages/conversations/:id
+// @access  Private
+const deleteConversation = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    const conversation = await Conversation.findById(id);
+    if (!conversation) {
+      return res.status(404).json({ message: 'Conversation not found' });
+    }
+
+    // Verify user is a participant (only participants can delete)
+    const isParticipant = conversation.participants.some(
+      p => p.toString() === userId
+    );
+
+    if (!isParticipant) {
+      return res.status(403).json({ message: 'Not authorized to delete this conversation' });
+    }
+
+    // Delete all messages in the conversation
+    await Message.deleteMany({ conversation: id });
+
+    // Delete the conversation
+    await Conversation.findByIdAndDelete(id);
+
+    res.json({ message: 'Conversation deleted successfully' });
+  } catch (error) {
+    console.error('Delete conversation error:', error);
+    res.status(500).json({ message: error.message || 'Failed to delete conversation' });
+  }
+};
+
 module.exports = {
   getOrCreateConversation,
   getUserConversations,
   getConversationById,
   getConversationMessages,
   sendMessage,
-  markAsRead
+  markAsRead,
+  deleteConversation
 };
 

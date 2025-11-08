@@ -7,22 +7,27 @@ import {
   getConversationById,
   getConversationMessages,
   sendMessage,
-  markConversationAsRead
+  markConversationAsRead,
+  deleteConversation
 } from '../utils/api'
 import {
   PaperAirplaneIcon,
   ChatBubbleLeftRightIcon,
-  UserIcon
+  UserIcon,
+  TrashIcon
 } from '@heroicons/react/24/outline'
+import { useNavigate } from 'react-router-dom'
 
 const MessagesPage = () => {
   const { conversationId } = useParams()
+  const navigate = useNavigate()
   const [conversations, setConversations] = useState([])
   const [selectedConversation, setSelectedConversation] = useState(null)
   const [messages, setMessages] = useState([])
   const [newMessage, setNewMessage] = useState('')
   const [loading, setLoading] = useState(true)
   const [sending, setSending] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const messagesEndRef = useRef(null)
   const user = JSON.parse(localStorage.getItem('user') || 'null')
 
@@ -104,6 +109,35 @@ const MessagesPage = () => {
   const getOtherParticipant = (conversation) => {
     if (!conversation.participants) return null
     return conversation.participants.find(p => p._id !== user._id)
+  }
+
+  const handleDeleteConversation = async () => {
+    if (!selectedConversation) return
+
+    const confirmDelete = window.confirm(
+      'Are you sure you want to delete this conversation? This action cannot be undone.'
+    )
+
+    if (!confirmDelete) return
+
+    setDeleting(true)
+    try {
+      await deleteConversation(selectedConversation._id)
+      toast.success('Conversation deleted successfully')
+      
+      // Remove conversation from list
+      setConversations(prev => prev.filter(conv => conv._id !== selectedConversation._id))
+      
+      // Clear selected conversation and navigate away
+      setSelectedConversation(null)
+      setMessages([])
+      navigate('/messages')
+    } catch (error) {
+      console.error('Error deleting conversation:', error)
+      toast.error(getErrorMessage(error, 'Failed to delete conversation'))
+    } finally {
+      setDeleting(false)
+    }
   }
 
   if (loading) {
@@ -206,31 +240,41 @@ const MessagesPage = () => {
                     {(() => {
                       const otherUser = getOtherParticipant(selectedConversation)
                       return (
-                        <div className="flex items-center space-x-3">
-                          {otherUser?.avatar ? (
-                            <img
-                              src={otherUser.avatar}
-                              alt={otherUser.name}
-                              className="w-10 h-10 rounded-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center">
-                              <UserIcon className="w-5 h-5 text-gray-400 dark:text-gray-600" />
-                            </div>
-                          )}
-                          <div>
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                              {otherUser?.name || 'Unknown User'}
-                            </h3>
-                            {selectedConversation.listing && selectedConversation.listing._id && (
-                              <Link
-                                to={`/listings/${selectedConversation.listing._id}`}
-                                className="text-sm text-primary-600 dark:text-white hover:text-primary-700 dark:hover:text-gray-300"
-                              >
-                                View Listing: {selectedConversation.listing.title}
-                              </Link>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            {otherUser?.avatar ? (
+                              <img
+                                src={otherUser.avatar}
+                                alt={otherUser.name}
+                                className="w-10 h-10 rounded-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center">
+                                <UserIcon className="w-5 h-5 text-gray-400 dark:text-gray-600" />
+                              </div>
                             )}
+                            <div>
+                              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                {otherUser?.name || 'Unknown User'}
+                              </h3>
+                              {selectedConversation.listing && selectedConversation.listing._id && (
+                                <Link
+                                  to={`/listings/${selectedConversation.listing._id}`}
+                                  className="text-sm text-primary-600 dark:text-white hover:text-primary-700 dark:hover:text-gray-300"
+                                >
+                                  View Listing: {selectedConversation.listing.title}
+                                </Link>
+                              )}
+                            </div>
                           </div>
+                          <button
+                            onClick={handleDeleteConversation}
+                            disabled={deleting}
+                            className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Delete conversation"
+                          >
+                            <TrashIcon className="w-5 h-5" />
+                          </button>
                         </div>
                       )
                     })()}

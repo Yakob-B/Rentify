@@ -147,6 +147,7 @@ export const getConversationMessages = (id, params = {}) => {
 }
 export const sendMessage = (conversationId, content) => api.post(`/messages/conversations/${conversationId}/messages`, { content })
 export const markConversationAsRead = (conversationId) => api.put(`/messages/conversations/${conversationId}/read`)
+export const deleteConversation = (conversationId) => api.delete(`/messages/conversations/${conversationId}`)
 
 // Favorites API
 export const addFavorite = (listingId) => api.post('/favorites', { listingId })

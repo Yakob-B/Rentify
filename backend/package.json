@@ -8,6 +8,7 @@
     "dev": "nodemon server.js",
     "backfill:geo": "node scripts/backfill-geo.js",
     "fix:geo": "node scripts/fix-invalid-geo.js",
+    "migrate:conversations": "node scripts/migrate-conversation-index.js",
     "create-admin": "node scripts/create-first-admin.js",
     "fix-admin-password": "node scripts/fix-admin-password.js",
     "check-admin": "node scripts/check-admin.js"
