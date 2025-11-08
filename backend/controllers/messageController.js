@@ -34,29 +34,79 @@ const getOrCreateConversation = async (req, res) => {
     }
 
     // Find or create conversation
+    // Sort participants to ensure consistent ordering for the index
     const participants = [userId, recipientId].sort();
+    
+    // Build query - use exact match for participants array to match the index
     const query = listingId 
-      ? { participants: { $all: participants }, listing: listingId }
-      : { participants: { $all: participants }, listing: null };
+      ? { participants: participants, listing: listingId }
+      : { participants: participants, listing: null };
 
+    // Try to find existing conversation
     let conversation = await Conversation.findOne(query)
       .populate('participants', 'name email avatar')
       .populate('listing', 'title images')
       .populate('lastMessage');
 
     if (!conversation) {
-      conversation = await Conversation.create({
-        participants: participants,
-        listing: listingId || null
-      });
-      conversation = await Conversation.findById(conversation._id)
-        .populate('participants', 'name email avatar')
-        .populate('listing', 'title images');
+      // Conversation doesn't exist, try to create it
+      try {
+        conversation = await Conversation.create({
+          participants: participants,
+          listing: listingId || null
+        });
+        conversation = await Conversation.findById(conversation._id)
+          .populate('participants', 'name email avatar')
+          .populate('listing', 'title images');
+      } catch (createError) {
+        // Handle duplicate key error (race condition - another request created it)
+        if (createError.code === 11000 || createError.name === 'MongoServerError') {
+          // Duplicate key error - conversation was created by another request
+          // Find and return the existing conversation
+          conversation = await Conversation.findOne(query)
+            .populate('participants', 'name email avatar')
+            .populate('listing', 'title images')
+            .populate('lastMessage');
+          
+          if (!conversation) {
+            // Still not found, might be a different error
+            throw createError;
+          }
+        } else {
+          // Different error, rethrow it
+          throw createError;
+        }
+      }
     }
 
     res.json(conversation);
   } catch (error) {
     console.error('Get or create conversation error:', error);
+    
+    // Provide more helpful error messages
+    if (error.code === 11000) {
+      // Duplicate key error - try one more time to find it
+      try {
+        const { recipientId, listingId } = req.body;
+        const userId = req.user.id;
+        const participants = [userId, recipientId].sort();
+        const query = listingId 
+          ? { participants: participants, listing: listingId }
+          : { participants: participants, listing: null };
+        
+        const conversation = await Conversation.findOne(query)
+          .populate('participants', 'name email avatar')
+          .populate('listing', 'title images')
+          .populate('lastMessage');
+        
+        if (conversation) {
+          return res.json(conversation);
+        }
+      } catch (retryError) {
+        console.error('Retry failed:', retryError);
+      }
+    }
+    
     res.status(500).json({ message: error.message || 'Failed to get or create conversation' });
   }
 };

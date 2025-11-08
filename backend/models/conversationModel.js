@@ -30,8 +30,14 @@ const conversationSchema = new mongoose.Schema({
 });
 
 // Ensure unique conversation between two users for a listing
-conversationSchema.index({ participants: 1, listing: 1 }, { unique: true, sparse: true });
-// Index for finding user conversations
+// Using sparse index - only enforces uniqueness when listing exists
+// Note: MongoDB multikey indexes on arrays work, but we must ensure array order is consistent
+conversationSchema.index({ participants: 1, listing: 1 }, { 
+  unique: true, 
+  sparse: true
+});
+
+// Index for finding user conversations (participants array is multikey)
 conversationSchema.index({ participants: 1, lastMessageAt: -1 });
 
 module.exports = mongoose.model('Conversation', conversationSchema);
