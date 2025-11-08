@@ -101,6 +101,46 @@ const listingSchema = new mongoose.Schema({
   timestamps: true
 });
 
+// Pre-validate hook to clean up invalid geo fields BEFORE validation
+listingSchema.pre('validate', function(next) {
+  // Clean up invalid geo fields before validation
+  if (this.geo !== undefined && this.geo !== null) {
+    // Check if geo.type is null (this causes validation errors)
+    if (this.geo && (this.geo.type === null || this.geo.type === undefined)) {
+      // If type is null/undefined but coordinates exist, try to fix it
+      if (Array.isArray(this.geo.coordinates) && this.geo.coordinates.length === 2) {
+        this.geo.type = 'Point';
+      } else {
+        // Invalid geo, remove it
+        this.geo = undefined;
+      }
+    }
+    
+    // Check if geo is an object with invalid structure
+    if (typeof this.geo === 'object' && this.geo !== null) {
+      // If coordinates are missing or invalid, try to populate from location
+      if (!Array.isArray(this.geo.coordinates) || this.geo.coordinates.length !== 2) {
+        if (this.location && this.location.coordinates) {
+          const { lat, lng } = this.location.coordinates;
+          if (typeof lat === 'number' && typeof lng === 'number' && !isNaN(lat) && !isNaN(lng)) {
+            this.geo = {
+              type: 'Point',
+              coordinates: [Number(lng), Number(lat)],
+              address: this.location.address || (this.geo.address ? this.geo.address : undefined)
+            };
+          } else {
+            this.geo = undefined;
+          }
+        } else {
+          this.geo = undefined;
+        }
+      }
+    }
+  }
+  
+  next();
+});
+
 // Custom validation for geo field
 listingSchema.path('geo').validate(function(value) {
   // If geo is undefined, null, or not set, it's valid (field is optional)
@@ -123,8 +163,8 @@ listingSchema.path('geo').validate(function(value) {
     return false;
   }
   
-  // Check type if provided
-  if (value.type !== undefined && value.type !== 'Point') {
+  // Check type if provided (should not be null)
+  if (value.type !== undefined && value.type !== null && value.type !== 'Point') {
     return false;
   }
   

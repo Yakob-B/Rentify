@@ -178,6 +178,26 @@ const getListingById = async (req, res) => {
       .populate('owner', 'name email phone avatar');
 
     if (listing) {
+      // Clean up invalid geo field before saving (in case it has geo.type: null)
+      if (listing.geo && (listing.geo.type === null || (listing.geo.type === undefined && (!listing.geo.coordinates || listing.geo.coordinates.length !== 2)))) {
+        // Try to populate from location.coordinates if available
+        if (listing.location && listing.location.coordinates) {
+          const { lat, lng } = listing.location.coordinates;
+          if (typeof lat === 'number' && typeof lng === 'number' && !isNaN(lat) && !isNaN(lng)) {
+            listing.geo = {
+              type: 'Point',
+              coordinates: [Number(lng), Number(lat)],
+              address: listing.location.address || listing.geo.address
+            };
+          } else {
+            listing.geo = undefined;
+          }
+        } else {
+          listing.geo = undefined;
+        }
+        listing.markModified('geo');
+      }
+      
       // Increment view count
       listing.views += 1;
       await listing.save();
@@ -191,6 +211,29 @@ const getListingById = async (req, res) => {
     // Check if it's a CastError (invalid ObjectId)
     if (error.name === 'CastError') {
       return res.status(400).json({ message: 'Invalid listing ID format' });
+    }
+    // Check if it's a validation error
+    if (error.name === 'ValidationError') {
+      console.error('Validation error details:', error.errors);
+      // Try to fix and retry if it's a geo validation error
+      if (error.errors && error.errors.geo) {
+        try {
+          const listing = await Listing.findById(id);
+          if (listing) {
+            listing.geo = undefined;
+            listing.markModified('geo');
+            listing.views += 1;
+            await listing.save();
+            const fixedListing = await Listing.findById(id)
+              .populate('category', 'name icon')
+              .populate('owner', 'name email phone avatar');
+            return res.json(fixedListing);
+          }
+        } catch (retryError) {
+          console.error('Error fixing listing:', retryError);
+        }
+      }
+      return res.status(400).json({ message: `Validation error: ${error.message}` });
     }
     res.status(500).json({ message: error.message || 'Failed to fetch listing' });
   }
