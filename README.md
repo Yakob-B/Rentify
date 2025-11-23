@@ -5,7 +5,7 @@
 **Personal Full-Stack MERN Project • 2025**  
 Rent anything — homes, cars, tools, electronics, event spaces — in one secure platform.
 
-[![Live Demo](https://img.shields.io/badge/Live-rentify.yakobdev.xyz-000?style=for-the-badge&logo=vercel&logoColor=white)](https://rentify.yakobdev.xyz)
+[![Live Demo](https://img.shields.io/badge/Live-rentify.yakobdev.xyz-000?style=for-the-badge&logo=vercel&logoColor=white)](https://rentify-orcin-five.vercel.app/)
 [![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react)](https://react.dev)
 [![Node.js](https://img.shields.io/badge/Node.js-20-339933?style=for-the-badge&logo=node.js)](https://nodejs.org)
 
@@ -30,8 +30,8 @@ Rent anything — homes, cars, tools, electronics, event spaces — in one secur
 `React 18` `Vite` `Tailwind CSS` `Node.js` `Express` `MongoDB`  
 `JWT` `bcrypt` `Cloudinary` `React Hook Form` `Vercel` `Railway`
 
-**Live Demo** → https://rentify.yakobdev.xyz  
-**Backend** → https://rentify-api.up.railway.app (contact for access)
+**Live Demo** → [https://rentify.yakobdev.xyz](https://rentify-orcin-five.vercel.app/)  
+**Backend** → deployed on render (contact for access)
 
 > A production-ready rental marketplace built from scratch.
 
