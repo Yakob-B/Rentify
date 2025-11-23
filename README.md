@@ -12,8 +12,8 @@ Rent anything — homes, cars, tools, electronics, event spaces — in one secur
 <br/>
 
 <img src="https://raw.githubusercontent.com/Yakob-B/Rentify/main/home.png" alt="Home Page" width="100%"/>
-<img src="https://raw.githubusercontent.com/Yakob-B/Rentify/main/preview/dashboard.png" alt="Owner Dashboard" width="100%"/>
-<img src="https://raw.githubusercontent.com/Yakob-B/Rentify/main/preview/listing.png" alt="Listing Details" width="100%"/>
+<img src="https://raw.githubusercontent.com/Yakob-B/Rentify/main/dashboard.png" alt="Owner Dashboard" width="100%"/>
+<img src="https://raw.githubusercontent.com/Yakob-B/Rentify/main/listing.png" alt="Listing Details" width="100%"/>
 
 </div>
 
