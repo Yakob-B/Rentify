@@ -85,19 +85,19 @@ const getListings = async (req, res) => {
 
     let listingsQuery = Listing.find(query)
       .populate('category', 'name icon')
-      .populate('owner', 'name email phone avatar')
       .sort(sort)
       .limit(limit * 1)
-      .skip((page - 1) * limit);
+      .skip((page - 1) * limit)
+      .lean();
 
     // If using text search, project score and sort by it if no custom sort provided
     if (search) {
       listingsQuery = Listing.find(query, { score: { $meta: 'textScore' } })
         .populate('category', 'name icon')
-        .populate('owner', 'name email phone avatar')
         .sort(sortBy === 'createdAt' ? { score: { $meta: 'textScore' } } : sort)
         .limit(limit * 1)
-        .skip((page - 1) * limit);
+        .skip((page - 1) * limit)
+        .lean();
     }
 
     const listings = await listingsQuery;
@@ -146,7 +146,7 @@ const getNearbyListings = async (req, res) => {
     })
       .limit(Number(limit) || 10)
       .populate('category', 'name icon')
-      .populate('owner', 'name email phone avatar');
+      .lean();
 
     res.json({ listings });
   } catch (error) {
@@ -197,11 +197,11 @@ const getListingById = async (req, res) => {
         }
         listing.markModified('geo');
       }
-      
+
       // Increment view count
       listing.views += 1;
       await listing.save();
-      
+
       res.json(listing);
     } else {
       res.status(404).json({ message: 'Listing not found' });
@@ -312,7 +312,7 @@ const deleteListing = async (req, res) => {
     }
 
     await Listing.findByIdAndDelete(req.params.id);
-    
+
     // Clear cache for listings and this specific listing
     clearCache('/api/listings');
     clearCache(`/api/listings/${req.params.id}`);
