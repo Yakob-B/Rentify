@@ -26,6 +26,10 @@ import MessagesPage from './pages/MessagesPage'
 import FavoritesPage from './pages/FavoritesPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
+import { PrivacyPolicy, TermsOfService, CookiePolicy } from './pages/LegalPages'
+import { FAQPage, ContactPage } from './pages/SupportPages'
+import SitemapPage from './pages/SitemapPage'
+
 
 const ProtectedRoute = ({ children, roles }) => {
   const token = localStorage.getItem('token')
@@ -51,81 +55,85 @@ function App() {
           <main className="flex-grow">
             <PageTransition>
               <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/listings" element={<ListingsPage />} />
-              <Route path="/listings/:id" element={<ListingDetails />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
-              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-              <Route path="/reset-password" element={<ResetPasswordPage />} />
-              <Route path="/admin/register/:token" element={<AdminRegisterPage />} />
-              <Route path="/admin/register" element={<AdminRegisterPage />} />
-              <Route
-                path="/messages"
-                element={
-                  <ProtectedRoute>
-                    <MessagesPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/messages/:conversationId"
-                element={
-                  <ProtectedRoute>
-                    <MessagesPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/favorites"
-                element={
-                  <ProtectedRoute>
-                    <FavoritesPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/dashboard"
-                element={
-                  <ProtectedRoute>
-                    <DashboardPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/listings/new"
-                element={
-                  <ProtectedRoute roles={["owner", "admin"]}>
-                    <ListingForm />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/listings/:id/edit"
-                element={
-                  <ProtectedRoute roles={["owner", "admin"]}>
-                    <ListingForm />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/bookings/:id"
-                element={
-                  <ProtectedRoute>
-                    <BookingPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin"
-                element={
-                  <ProtectedRoute roles={["admin"]}>
-                    <AdminPanel />
-                  </ProtectedRoute>
-                }
-              />
-              <Route path="*" element={<NotFound />} />
+                <Route path="/" element={<HomePage />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/listings" element={<ListingsPage />} />
+                <Route path="/listings/:id" element={<ListingDetails />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
+                <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
+                <Route path="/admin/register/:token" element={<AdminRegisterPage />} />
+                <Route path="/admin/register" element={<AdminRegisterPage />} />
+                <Route
+                  path="/messages"
+                  element={
+                    <ProtectedRoute>
+                      <MessagesPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/messages/:conversationId"
+                  element={
+                    <ProtectedRoute>
+                      <MessagesPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/favorites"
+                  element={
+                    <ProtectedRoute>
+                      <FavoritesPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <DashboardPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/listings/new"
+                  element={
+                    <ProtectedRoute roles={["owner", "admin"]}>
+                      <ListingForm />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/listings/:id/edit"
+                  element={
+                    <ProtectedRoute roles={["owner", "admin"]}>
+                      <ListingForm />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/bookings/:id"
+                  element={
+                    <ProtectedRoute>
+                      <BookingPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin" element={<ProtectedRoute roles={["admin"]}><AdminPanel /></ProtectedRoute>} />
+
+                {/* Footer Pages */}
+                <Route path="/privacy" element={<PrivacyPolicy />} />
+                <Route path="/terms" element={<TermsOfService />} />
+                <Route path="/faq" element={<FAQPage />} />
+                <Route path="/contact" element={<ContactPage />} />
+                <Route path="/support" element={<ContactPage />} />
+                <Route path="/cookies" element={<CookiePolicy />} />
+                <Route path="/sitemap" element={<SitemapPage />} />
+
+                <Route path="*" element={<NotFound />} />
               </Routes>
             </PageTransition>
           </main>

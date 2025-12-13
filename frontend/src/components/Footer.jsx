@@ -108,20 +108,20 @@ const Footer = () => {
             <div className="space-y-4">
               <h3 className="font-bold text-lg">Help</h3>
               <ul className="space-y-2 text-sm text-emerald-50">
-                <li><a href="#" className="hover:text-white hover:underline">Support</a></li>
-                <li><a href="#" className="hover:text-white hover:underline">Terms</a></li>
-                <li><a href="#" className="hover:text-white hover:underline">Privacy</a></li>
-                <li><a href="#" className="hover:text-white hover:underline">FAQ</a></li>
+                <li><Link to="/support" className="hover:text-white hover:underline">Support</Link></li>
+                <li><Link to="/terms" className="hover:text-white hover:underline">Terms</Link></li>
+                <li><Link to="/privacy" className="hover:text-white hover:underline">Privacy</Link></li>
+                <li><Link to="/faq" className="hover:text-white hover:underline">FAQ</Link></li>
               </ul>
             </div>
 
             <div className="space-y-4">
               <h3 className="font-bold text-lg">About Us</h3>
               <ul className="space-y-2 text-sm text-emerald-50">
-                <li><a href="#" className="hover:text-white hover:underline">Our Story</a></li>
-                <li><a href="#" className="hover:text-white hover:underline">Team</a></li>
+                <li><Link to="/about" className="hover:text-white hover:underline">Our Story</Link></li>
+                <li><Link to="/about" className="hover:text-white hover:underline">Team</Link></li>
                 <li><a href="#" className="hover:text-white hover:underline">Careers</a></li>
-                <li><a href="#" className="hover:text-white hover:underline">Contact</a></li>
+                <li><Link to="/contact" className="hover:text-white hover:underline">Contact</Link></li>
               </ul>
             </div>
           </div>
@@ -146,10 +146,10 @@ const Footer = () => {
         <div className="border-t border-white/20 py-6 text-xs text-emerald-100 flex flex-col md:flex-row justify-between items-center">
           <p>© {currentYear} Rentify. All Right Resolved</p>
           <div className="flex space-x-6 mt-4 md:mt-0">
-            <a href="#" className="hover:text-white">Privacy Policy</a>
-            <a href="#" className="hover:text-white">Terms & Conditions</a>
-            <a href="#" className="hover:text-white">Cookie Policy</a>
-            <a href="#" className="hover:text-white">Sitemap</a>
+            <Link to="/privacy" className="hover:text-white">Privacy Policy</Link>
+            <Link to="/terms" className="hover:text-white">Terms & Conditions</Link>
+            <Link to="/cookies" className="hover:text-white">Cookie Policy</Link>
+            <Link to="/sitemap" className="hover:text-white">Sitemap</Link>
           </div>
         </div>
       </div>
