@@ -1,6 +1,7 @@
 const express = require('express');
 const connectDB = require('./config/db');
 const cors = require('cors');
+const compression = require('compression');
 require('dotenv').config();
 
 const app = express();
@@ -12,7 +13,7 @@ const corsOptions = {
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
-    
+
     // List of allowed origins
     const allowedOrigins = [
       'http://localhost:3000',
@@ -22,13 +23,13 @@ const corsOptions = {
       process.env.FRONTEND_URL,
       process.env.VITE_API_BASE_URL?.replace('/api', '') // Remove /api if present
     ].filter(Boolean);
-    
+
     // Check if origin is allowed
     const isExactMatch = allowedOrigins.includes(origin);
-    
+
     // Check if origin is a Vercel deployment (any subdomain of vercel.app)
     const isVercelDeployment = /^https:\/\/[\w-]+\.vercel\.app$/.test(origin);
-    
+
     if (isExactMatch || isVercelDeployment) {
       callback(null, true);
     } else {
@@ -62,6 +63,9 @@ app.post('/api/payments/telebirr/webhook', express.raw({ type: 'application/json
 
 // For all other routes use JSON parser
 app.use(express.json());
+
+// Content compression
+app.use(compression());
 
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));
