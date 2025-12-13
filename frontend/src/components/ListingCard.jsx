@@ -1,8 +1,8 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { 
-  MapPinIcon, 
-  StarIcon, 
+import {
+  MapPinIcon,
+  StarIcon,
   EyeIcon,
   CalendarIcon
 } from '@heroicons/react/24/outline'
@@ -25,7 +25,7 @@ const ListingCard = ({ listing }) => {
   }
 
   return (
-    <div className="card-hover group relative overflow-hidden">
+    <div className="card-hover group relative overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
       <Link to={`/listings/${listing._id}`} className="block">
         <div className="relative overflow-hidden">
           <div className="relative h-48">
@@ -36,7 +36,7 @@ const ListingCard = ({ listing }) => {
               placeholder='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300"%3E%3Crect fill="%23f3f4f6" width="400" height="300"/%3E%3C/svg%3E'
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-            
+
             {/* Favorite button */}
             <div className="absolute top-3 right-3 z-10" onClick={(e) => e.stopPropagation()}>
               <FavoriteButton listingId={listing._id} />
@@ -48,15 +48,14 @@ const ListingCard = ({ listing }) => {
                   {listing.category.name}
                 </span>
               )}
-              <span className={`px-2 py-1 rounded-md text-xs font-medium backdrop-blur-sm transition-all duration-300 ${
-                listing.status === 'active' ? 'bg-green-100 text-green-800 group-hover:bg-green-500 group-hover:text-white' :
+              <span className={`px-2 py-1 rounded-md text-xs font-medium backdrop-blur-sm transition-all duration-300 ${listing.status === 'active' ? 'bg-green-100 text-green-800 group-hover:bg-green-500 group-hover:text-white' :
                 listing.status === 'inactive' ? 'bg-gray-100 text-gray-800 group-hover:bg-gray-500 group-hover:text-white' :
-                'bg-yellow-100 text-yellow-800 group-hover:bg-yellow-500 group-hover:text-white'
-              }`}>
+                  'bg-yellow-100 text-yellow-800 group-hover:bg-yellow-500 group-hover:text-white'
+                }`}>
                 {listing.status || 'active'}
               </span>
             </div>
-            
+
             <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-white transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
               <div className="flex items-center gap-1 text-sm">
                 <StarIconSolid className="w-4 h-4 text-yellow-400" />
@@ -70,7 +69,7 @@ const ListingCard = ({ listing }) => {
           </div>
         </div>
 
-        <div className="p-4 space-y-3 bg-white dark:bg-black">
+        <div className="p-4 space-y-3 bg-white dark:bg-gray-900">
           <div className="flex justify-between items-start">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white line-clamp-2 group-hover:text-primary-700 dark:group-hover:text-white transition-colors duration-300">
               {listing.title}
@@ -79,16 +78,16 @@ const ListingCard = ({ listing }) => {
               {formatPrice(listing.price, listing.priceUnit)}
             </span>
           </div>
-          
+
           <p className="text-gray-600 dark:text-gray-300 text-sm line-clamp-2 group-hover:text-gray-700 dark:group-hover:text-white transition-colors duration-300">
             {listing.description}
           </p>
-          
+
           <div className="flex items-center text-gray-500 dark:text-gray-400 text-sm group-hover:text-gray-700 dark:group-hover:text-white transition-colors duration-300">
             <MapPinIcon className="w-4 h-4 mr-2 text-primary-500 dark:text-white" />
             <span>{listing.location?.city || '—'}, {listing.location?.state || '—'}</span>
           </div>
-          
+
           <div className="flex items-center text-gray-500 dark:text-gray-400 text-xs group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors duration-300">
             <CalendarIcon className="w-3 h-3 mr-2 text-primary-500 dark:text-white" />
             <span>Available until {formatDate(listing.availability?.endDate)}</span>
