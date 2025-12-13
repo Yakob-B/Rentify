@@ -20,6 +20,29 @@ const ListingsPage = () => {
   const [loading, setLoading] = useState(true)
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
 
+  // Local state for debouncing search
+  const [localSearch, setLocalSearch] = useState(searchParams.get('search') || '')
+
+  // Sync local state when URL params change (e.g. back button)
+  useEffect(() => {
+    setLocalSearch(searchParams.get('search') || '')
+  }, [searchParams])
+
+  // Debounce updates to URL
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const currentSearch = searchParams.get('search') || ''
+      if (localSearch !== currentSearch) {
+        const next = new URLSearchParams(searchParams)
+        if (localSearch) next.set('search', localSearch)
+        else next.delete('search')
+        next.set('page', '1') // Reset to page 1 on search
+        setSearchParams(next)
+      }
+    }, 500) // 500ms debounce
+    return () => clearTimeout(timer)
+  }, [localSearch, searchParams, setSearchParams])
+
   const page = Number(searchParams.get('page') || 1)
   const category = searchParams.get('category') || ''
   const location = searchParams.get('location') || ''
@@ -115,8 +138,8 @@ const ListingsPage = () => {
             <input
               type="text"
               placeholder="Search listings by title or description..."
-              value={search}
-              onChange={(e) => updateParam('search', e.target.value)}
+              value={localSearch}
+              onChange={(e) => setLocalSearch(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-black dark:text-white dark:placeholder-gray-500"
             />
           </div>
@@ -390,5 +413,3 @@ const ListingsPage = () => {
 }
 
 export default ListingsPage
-
-
