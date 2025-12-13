@@ -16,7 +16,12 @@ import {
   FilmIcon,
   CubeIcon,
   ShoppingBagIcon,
-  AcademicCapIcon
+  AcademicCapIcon,
+  SunIcon,
+  BriefcaseIcon,
+  CpuChipIcon,
+  CakeIcon,
+  GlobeAltIcon
 } from '@heroicons/react/24/outline'
 
 const CategoryFilter = ({ categories, selectedCategory, onCategorySelect }) => {
@@ -24,7 +29,7 @@ const CategoryFilter = ({ categories, selectedCategory, onCategorySelect }) => {
 
   // Icon and color mapping for different categories
   const categoryConfig = {
-    'Home': {
+    'Home & Furniture': {
       icon: HomeIcon,
       colors: {
         bg: 'from-blue-50 to-blue-100',
@@ -36,7 +41,7 @@ const CategoryFilter = ({ categories, selectedCategory, onCategorySelect }) => {
         shadow: 'shadow-blue-500/25'
       }
     },
-    'Property': {
+    'Real Estate & Accommodation': {
       icon: BuildingOfficeIcon,
       colors: {
         bg: 'from-indigo-50 to-indigo-100',
@@ -48,7 +53,7 @@ const CategoryFilter = ({ categories, selectedCategory, onCategorySelect }) => {
         shadow: 'shadow-indigo-500/25'
       }
     },
-    'Vehicle': {
+    'Vehicles & Transportation': {
       icon: TruckIcon,
       colors: {
         bg: 'from-red-50 to-red-100',
@@ -60,7 +65,7 @@ const CategoryFilter = ({ categories, selectedCategory, onCategorySelect }) => {
         shadow: 'shadow-red-500/25'
       }
     },
-    'Tool': {
+    'Tools & Equipment': {
       icon: WrenchScrewdriverIcon,
       colors: {
         bg: 'from-orange-50 to-orange-100',
@@ -72,20 +77,8 @@ const CategoryFilter = ({ categories, selectedCategory, onCategorySelect }) => {
         shadow: 'shadow-orange-500/25'
       }
     },
-    'Tools': {
-      icon: WrenchScrewdriverIcon,
-      colors: {
-        bg: 'from-orange-50 to-orange-100',
-        border: 'border-orange-500',
-        text: 'text-orange-700',
-        icon: 'text-orange-600',
-        hoverBorder: 'hover:border-orange-300',
-        hoverBg: 'hover:from-orange-50 hover:to-orange-100',
-        shadow: 'shadow-orange-500/25'
-      }
-    },
-    'Electronics': {
-      icon: DevicePhoneMobileIcon,
+    'Electronics & Gadgets': {
+      icon: CpuChipIcon,
       colors: {
         bg: 'from-purple-50 to-purple-100',
         border: 'border-purple-500',
@@ -96,20 +89,20 @@ const CategoryFilter = ({ categories, selectedCategory, onCategorySelect }) => {
         shadow: 'shadow-purple-500/25'
       }
     },
-    'Computer': {
-      icon: ComputerDesktopIcon,
+    'Business & Office Equipment': {
+      icon: BriefcaseIcon,
       colors: {
-        bg: 'from-violet-50 to-violet-100',
-        border: 'border-violet-500',
-        text: 'text-violet-700',
-        icon: 'text-violet-600',
-        hoverBorder: 'hover:border-violet-300',
-        hoverBg: 'hover:from-violet-50 hover:to-violet-100',
-        shadow: 'shadow-violet-500/25'
+        bg: 'from-slate-50 to-slate-100',
+        border: 'border-slate-500',
+        text: 'text-slate-700',
+        icon: 'text-slate-600',
+        hoverBorder: 'hover:border-slate-300',
+        hoverBg: 'hover:from-slate-50 hover:to-slate-100',
+        shadow: 'shadow-slate-500/25'
       }
     },
-    'Music': {
-      icon: MusicalNoteIcon,
+    'Event & Party Rentals': {
+      icon: CakeIcon,
       colors: {
         bg: 'from-pink-50 to-pink-100',
         border: 'border-pink-500',
@@ -120,32 +113,8 @@ const CategoryFilter = ({ categories, selectedCategory, onCategorySelect }) => {
         shadow: 'shadow-pink-500/25'
       }
     },
-    'Photography': {
-      icon: CameraIcon,
-      colors: {
-        bg: 'from-teal-50 to-teal-100',
-        border: 'border-teal-500',
-        text: 'text-teal-700',
-        icon: 'text-teal-600',
-        hoverBorder: 'hover:border-teal-300',
-        hoverBg: 'hover:from-teal-50 hover:to-teal-100',
-        shadow: 'shadow-teal-500/25'
-      }
-    },
-    'Camera': {
-      icon: CameraIcon,
-      colors: {
-        bg: 'from-teal-50 to-teal-100',
-        border: 'border-teal-500',
-        text: 'text-teal-700',
-        icon: 'text-teal-600',
-        hoverBorder: 'hover:border-teal-300',
-        hoverBg: 'hover:from-teal-50 hover:to-teal-100',
-        shadow: 'shadow-teal-500/25'
-      }
-    },
-    'Books': {
-      icon: BookOpenIcon,
+    'Agriculture & Rural Tools': {
+      icon: SunIcon,
       colors: {
         bg: 'from-amber-50 to-amber-100',
         border: 'border-amber-500',
@@ -156,20 +125,8 @@ const CategoryFilter = ({ categories, selectedCategory, onCategorySelect }) => {
         shadow: 'shadow-amber-500/25'
       }
     },
-    'Education': {
-      icon: AcademicCapIcon,
-      colors: {
-        bg: 'from-cyan-50 to-cyan-100',
-        border: 'border-cyan-500',
-        text: 'text-cyan-700',
-        icon: 'text-cyan-600',
-        hoverBorder: 'hover:border-cyan-300',
-        hoverBg: 'hover:from-cyan-50 hover:to-cyan-100',
-        shadow: 'shadow-cyan-500/25'
-      }
-    },
-    'Fashion': {
-      icon: ScissorsIcon,
+    'Fashion & Accessories': {
+      icon: ShoppingBagIcon,
       colors: {
         bg: 'from-rose-50 to-rose-100',
         border: 'border-rose-500',
@@ -180,52 +137,28 @@ const CategoryFilter = ({ categories, selectedCategory, onCategorySelect }) => {
         shadow: 'shadow-rose-500/25'
       }
     },
-    'Entertainment': {
-      icon: FilmIcon,
+    'Travel & Leisur': {
+      icon: GlobeAltIcon,
       colors: {
-        bg: 'from-fuchsia-50 to-fuchsia-100',
-        border: 'border-fuchsia-500',
-        text: 'text-fuchsia-700',
-        icon: 'text-fuchsia-600',
-        hoverBorder: 'hover:border-fuchsia-300',
-        hoverBg: 'hover:from-fuchsia-50 hover:to-fuchsia-100',
-        shadow: 'shadow-fuchsia-500/25'
+        bg: 'from-teal-50 to-teal-100',
+        border: 'border-teal-500',
+        text: 'text-teal-700',
+        icon: 'text-teal-600',
+        hoverBorder: 'hover:border-teal-300',
+        hoverBg: 'hover:from-teal-50 hover:to-teal-100',
+        shadow: 'shadow-teal-500/25'
       }
     },
-    'Sports': {
-      icon: SparklesIcon,
+    'Travel & Leisure': {
+      icon: GlobeAltIcon,
       colors: {
-        bg: 'from-green-50 to-green-100',
-        border: 'border-green-500',
-        text: 'text-green-700',
-        icon: 'text-green-600',
-        hoverBorder: 'hover:border-green-300',
-        hoverBg: 'hover:from-green-50 hover:to-green-100',
-        shadow: 'shadow-green-500/25'
-      }
-    },
-    'Shopping': {
-      icon: ShoppingBagIcon,
-      colors: {
-        bg: 'from-lime-50 to-lime-100',
-        border: 'border-lime-500',
-        text: 'text-lime-700',
-        icon: 'text-lime-600',
-        hoverBorder: 'hover:border-lime-300',
-        hoverBg: 'hover:from-lime-50 hover:to-lime-100',
-        shadow: 'shadow-lime-500/25'
-      }
-    },
-    'Other': {
-      icon: CubeIcon,
-      colors: {
-        bg: 'from-gray-50 to-gray-100',
-        border: 'border-gray-500',
-        text: 'text-gray-700',
-        icon: 'text-gray-600',
-        hoverBorder: 'hover:border-gray-300',
-        hoverBg: 'hover:from-gray-50 hover:to-gray-100',
-        shadow: 'shadow-gray-500/25'
+        bg: 'from-teal-50 to-teal-100',
+        border: 'border-teal-500',
+        text: 'text-teal-700',
+        icon: 'text-teal-600',
+        hoverBorder: 'hover:border-teal-300',
+        hoverBg: 'hover:from-teal-50 hover:to-teal-100',
+        shadow: 'shadow-teal-500/25'
       }
     }
   }
