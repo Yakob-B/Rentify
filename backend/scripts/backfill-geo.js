@@ -5,6 +5,7 @@
 
 const mongoose = require('mongoose')
 const path = require('path')
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') })
 
 // Ensure models can be required relative to this script
 const Listing = require(path.join('..', 'models', 'listingModel'))
@@ -27,7 +28,7 @@ async function run() {
     for (let doc = await cursor.next(); doc != null; doc = await cursor.next()) {
       const hasGeo = doc.geo && Array.isArray(doc.geo.coordinates) && doc.geo.coordinates.length === 2
       const hasLegacy = doc.location && doc.location.coordinates && typeof doc.location.coordinates.lat === 'number' && typeof doc.location.coordinates.lng === 'number'
-      
+
       // Check if geo field exists but is incomplete (has type but no coordinates)
       const hasIncompleteGeo = doc.geo && doc.geo.type === 'Point' && (!doc.geo.coordinates || !Array.isArray(doc.geo.coordinates) || doc.geo.coordinates.length !== 2)
 
