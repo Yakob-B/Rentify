@@ -39,12 +39,16 @@ const enhanceDescription = async (originalDescription, context = {}) => {
         console.error('AI Enhancement Error:', error);
 
         // Provide meaningful error messages
-        if (error.message?.includes('API key')) {
-            throw new Error('Invalid API key. Please check your GEMINI_API_KEY configuration.');
-        } else if (error.message?.includes('quota')) {
+        const errorMessage = error.message || '';
+
+        if (errorMessage.includes('API key')) {
+            throw new Error('Invalid API key or key not found. Please check your GEMINI_API_KEY configuration.');
+        } else if (errorMessage.includes('quota')) {
             throw new Error('AI service quota exceeded. Please try again later.');
+        } else if (errorMessage.includes('not found')) {
+            throw new Error(`AI model error: ${errorMessage}. Try checking model name and availability.`);
         } else {
-            throw new Error('Failed to enhance description. Please try again.');
+            throw new Error(`AI Service Error: ${errorMessage || 'Failed to enhance description. Please try again.'}`);
         }
     }
 };
