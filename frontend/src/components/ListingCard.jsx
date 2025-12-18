@@ -10,7 +10,7 @@ import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid'
 import FavoriteButton from './FavoriteButton'
 import LazyImage from './LazyImage'
 
-const ListingCard = ({ listing }) => {
+const ListingCard = React.memo(({ listing }) => {
   // Validate listing and ID
   if (!listing || !listing._id) {
     return null
@@ -96,6 +96,8 @@ const ListingCard = ({ listing }) => {
       </Link>
     </div>
   )
-}
+})
+
+ListingCard.displayName = 'ListingCard'
 
 export default ListingCard

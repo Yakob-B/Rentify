@@ -217,4 +217,12 @@ listingSchema.index({ title: 'text', description: 'text' });
 // 2dsphere index for geospatial queries (sparse index - only indexes documents with geo field)
 listingSchema.index({ geo: '2dsphere' }, { sparse: true });
 
+// Performance indexes
+listingSchema.index({ category: 1 });
+listingSchema.index({ owner: 1 });
+listingSchema.index({ status: 1 });
+listingSchema.index({ price: 1 });
+listingSchema.index({ category: 1, status: 1 }); // Compound index for common filter
+listingSchema.index({ createdAt: -1 }); // Index for sorting by newest
+
 module.exports = mongoose.model('Listing', listingSchema);

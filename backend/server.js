@@ -2,6 +2,7 @@ const express = require('express');
 const connectDB = require('./config/db');
 const cors = require('cors');
 const compression = require('compression');
+const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
 const app = express();
@@ -9,37 +10,24 @@ const { webhook } = require('./controllers/paymentController');
 const { handleTelebirrWebhook } = require('./controllers/telebirrController');
 
 // CORS configuration
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'https://rentify-orcin-five.vercel.app',
+  process.env.FRONTEND_URL,
+].filter(Boolean);
+
 const corsOptions = {
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-
-    // List of allowed origins
-    const allowedOrigins = [
-      'http://localhost:3000',
-      'http://localhost:5173',
-      'http://localhost:5174',
-      'https://rentify-orcin-five.vercel.app',
-      process.env.FRONTEND_URL,
-      process.env.VITE_API_BASE_URL?.replace('/api', '') // Remove /api if present
-    ].filter(Boolean);
-
-    // Check if origin is allowed
-    const isExactMatch = allowedOrigins.includes(origin);
-
-    // Check if origin is a Vercel deployment (any subdomain of vercel.app)
-    const isVercelDeployment = /^https:\/\/[\w-]+\.vercel\.app$/.test(origin);
-
-    if (isExactMatch || isVercelDeployment) {
+    if (!origin || allowedOrigins.includes(origin) || /^https:\/\/[\w-]+\.vercel\.app$/.test(origin)) {
       callback(null, true);
     } else {
-      // For development, allow all origins (fallback)
       if (process.env.NODE_ENV !== 'production') {
         callback(null, true);
       } else {
-        // In production, still allow but log it
         console.warn(`CORS: Request from unlisted origin: ${origin}`);
-        callback(null, true); // Allow for now, but can be restricted later
+        callback(null, true); // Still allowing but could be restricted
       }
     }
   },
@@ -47,7 +35,7 @@ const corsOptions = {
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   exposedHeaders: ['Content-Range', 'X-Content-Range'],
-  maxAge: 86400 // 24 hours
+  maxAge: 86400
 };
 
 // Middleware - CORS must be applied first
@@ -66,6 +54,23 @@ app.use(express.json());
 
 // Content compression
 app.use(compression());
+
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: 'Too many requests from this IP, please try again after 15 minutes'
+});
+
+// Apply rate limiter to all routes except webhooks
+app.use('/api/', (req, res, next) => {
+  if (req.path === '/payments/webhook' || req.path === '/payments/telebirr/webhook') {
+    return next();
+  }
+  limiter(req, res, next);
+});
 
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));

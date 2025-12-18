@@ -24,7 +24,7 @@ import {
   GlobeAltIcon
 } from '@heroicons/react/24/outline'
 
-const CategoryFilter = ({ categories, selectedCategory, onCategorySelect }) => {
+const CategoryFilter = React.memo(({ categories, selectedCategory, onCategorySelect }) => {
   const [hoveredCategory, setHoveredCategory] = useState(null)
 
   // Icon and color mapping for different categories
@@ -265,6 +265,8 @@ const CategoryFilter = ({ categories, selectedCategory, onCategorySelect }) => {
       )}
     </div>
   )
-}
+})
+
+CategoryFilter.displayName = 'CategoryFilter'
 
 export default CategoryFilter

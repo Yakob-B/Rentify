@@ -101,4 +101,12 @@ const bookingSchema = new mongoose.Schema({
   timestamps: true
 });
 
+// Performance indexes
+bookingSchema.index({ listing: 1 });
+bookingSchema.index({ renter: 1 });
+bookingSchema.index({ owner: 1 });
+bookingSchema.index({ status: 1 });
+bookingSchema.index({ paymentStatus: 1 });
+bookingSchema.index({ createdAt: -1 });
+
 module.exports = mongoose.model('Booking', bookingSchema);

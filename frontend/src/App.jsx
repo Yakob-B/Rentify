@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { lazy, Suspense, useMemo } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 
@@ -7,39 +7,49 @@ import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import PageTransition from './components/PageTransition'
 import FloatingThemeToggle from './components/FloatingThemeToggle'
+import LoadingSpinner from './components/LoadingSpinner'
 import { ThemeProvider } from './contexts/ThemeContext'
 
-// Pages
-import HomePage from './pages/HomePage'
-import LoginPage from './pages/LoginPage'
-import RegisterPage from './pages/RegisterPage'
-import AdminRegisterPage from './pages/AdminRegisterPage'
-import DashboardPage from './pages/DashboardPage'
-import ListingForm from './pages/ListingForm'
-import BookingPage from './pages/BookingPage'
-import AdminPanel from './pages/AdminPanel'
-import NotFound from './pages/NotFound'
-import ListingsPage from './pages/ListingsPage'
-import ListingDetails from './pages/ListingDetails'
-import About from './pages/About'
-import MessagesPage from './pages/MessagesPage'
-import FavoritesPage from './pages/FavoritesPage'
-import ForgotPasswordPage from './pages/ForgotPasswordPage'
-import ResetPasswordPage from './pages/ResetPasswordPage'
-import { PrivacyPolicy, TermsOfService, CookiePolicy } from './pages/LegalPages'
-import { FAQPage, ContactPage } from './pages/SupportPages'
-import SitemapPage from './pages/SitemapPage'
+// Lazy load pages
+const HomePage = lazy(() => import('./pages/HomePage'))
+const LoginPage = lazy(() => import('./pages/LoginPage'))
+const RegisterPage = lazy(() => import('./pages/RegisterPage'))
+const AdminRegisterPage = lazy(() => import('./pages/AdminRegisterPage'))
+const DashboardPage = lazy(() => import('./pages/DashboardPage'))
+const ListingForm = lazy(() => import('./pages/ListingForm'))
+const BookingPage = lazy(() => import('./pages/BookingPage'))
+const AdminPanel = lazy(() => import('./pages/AdminPanel'))
+const NotFound = lazy(() => import('./pages/NotFound'))
+const ListingsPage = lazy(() => import('./pages/ListingsPage'))
+const ListingDetails = lazy(() => import('./pages/ListingDetails'))
+const About = lazy(() => import('./pages/About'))
+const MessagesPage = lazy(() => import('./pages/MessagesPage'))
+const FavoritesPage = lazy(() => import('./pages/FavoritesPage'))
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'))
+const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'))
+const SitemapPage = lazy(() => import('./pages/SitemapPage'))
 
+// Legal Pages
+const PrivacyPolicy = lazy(() => import('./pages/LegalPages').then(m => ({ default: m.PrivacyPolicy })))
+const TermsOfService = lazy(() => import('./pages/LegalPages').then(m => ({ default: m.TermsOfService })))
+const CookiePolicy = lazy(() => import('./pages/LegalPages').then(m => ({ default: m.CookiePolicy })))
+
+// Support Pages
+const FAQPage = lazy(() => import('./pages/SupportPages').then(m => ({ default: m.FAQPage })))
+const ContactPage = lazy(() => import('./pages/SupportPages').then(m => ({ default: m.ContactPage })))
 
 const ProtectedRoute = ({ children, roles }) => {
-  const token = localStorage.getItem('token')
-  const user = JSON.parse(localStorage.getItem('user') || 'null')
+  const authData = useMemo(() => {
+    const token = localStorage.getItem('token')
+    const user = JSON.parse(localStorage.getItem('user') || 'null')
+    return { token, user }
+  }, [])
 
-  if (!token || !user) {
+  if (!authData.token || !authData.user) {
     return <Navigate to="/login" replace />
   }
 
-  if (roles && roles.length > 0 && !roles.includes(user.role)) {
+  if (roles && roles.length > 0 && !roles.includes(authData.user.role)) {
     return <Navigate to="/" replace />
   }
 
@@ -54,87 +64,89 @@ function App() {
           <Navbar />
           <main className="flex-grow">
             <PageTransition>
-              <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/listings" element={<ListingsPage />} />
-                <Route path="/listings/:id" element={<ListingDetails />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/register" element={<RegisterPage />} />
-                <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-                <Route path="/reset-password" element={<ResetPasswordPage />} />
-                <Route path="/admin/register/:token" element={<AdminRegisterPage />} />
-                <Route path="/admin/register" element={<AdminRegisterPage />} />
-                <Route
-                  path="/messages"
-                  element={
-                    <ProtectedRoute>
-                      <MessagesPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/messages/:conversationId"
-                  element={
-                    <ProtectedRoute>
-                      <MessagesPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/favorites"
-                  element={
-                    <ProtectedRoute>
-                      <FavoritesPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/dashboard"
-                  element={
-                    <ProtectedRoute>
-                      <DashboardPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/listings/new"
-                  element={
-                    <ProtectedRoute roles={["owner", "admin"]}>
-                      <ListingForm />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/listings/:id/edit"
-                  element={
-                    <ProtectedRoute roles={["owner", "admin"]}>
-                      <ListingForm />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/bookings/:id"
-                  element={
-                    <ProtectedRoute>
-                      <BookingPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/admin" element={<ProtectedRoute roles={["admin"]}><AdminPanel /></ProtectedRoute>} />
+              <Suspense fallback={<LoadingSpinner />}>
+                <Routes>
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/listings" element={<ListingsPage />} />
+                  <Route path="/listings/:id" element={<ListingDetails />} />
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/register" element={<RegisterPage />} />
+                  <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                  <Route path="/reset-password" element={<ResetPasswordPage />} />
+                  <Route path="/admin/register/:token" element={<AdminRegisterPage />} />
+                  <Route path="/admin/register" element={<AdminRegisterPage />} />
+                  <Route
+                    path="/messages"
+                    element={
+                      <ProtectedRoute>
+                        <MessagesPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/messages/:conversationId"
+                    element={
+                      <ProtectedRoute>
+                        <MessagesPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/favorites"
+                    element={
+                      <ProtectedRoute>
+                        <FavoritesPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/dashboard"
+                    element={
+                      <ProtectedRoute>
+                        <DashboardPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/listings/new"
+                    element={
+                      <ProtectedRoute roles={["owner", "admin"]}>
+                        <ListingForm />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/listings/:id/edit"
+                    element={
+                      <ProtectedRoute roles={["owner", "admin"]}>
+                        <ListingForm />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/bookings/:id"
+                    element={
+                      <ProtectedRoute>
+                        <BookingPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin" element={<ProtectedRoute roles={["admin"]}><AdminPanel /></ProtectedRoute>} />
 
-                {/* Footer Pages */}
-                <Route path="/privacy" element={<PrivacyPolicy />} />
-                <Route path="/terms" element={<TermsOfService />} />
-                <Route path="/faq" element={<FAQPage />} />
-                <Route path="/contact" element={<ContactPage />} />
-                <Route path="/support" element={<ContactPage />} />
-                <Route path="/cookies" element={<CookiePolicy />} />
-                <Route path="/sitemap" element={<SitemapPage />} />
+                  {/* Footer Pages */}
+                  <Route path="/privacy" element={<PrivacyPolicy />} />
+                  <Route path="/terms" element={<TermsOfService />} />
+                  <Route path="/faq" element={<FAQPage />} />
+                  <Route path="/contact" element={<ContactPage />} />
+                  <Route path="/support" element={<ContactPage />} />
+                  <Route path="/cookies" element={<CookiePolicy />} />
+                  <Route path="/sitemap" element={<SitemapPage />} />
 
-                <Route path="*" element={<NotFound />} />
-              </Routes>
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </Suspense>
             </PageTransition>
           </main>
           <Footer />
