@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { getErrorMessage } from '../utils/errors'
 import { getCategories, createCategory, updateCategory, deleteCategory } from '../utils/api'
@@ -12,13 +13,22 @@ import {
   XCircleIcon,
   XMarkIcon,
   ClipboardDocumentIcon,
-  PaperAirplaneIcon
+  PaperAirplaneIcon,
+  CreditCardIcon,
+  CheckBadgeIcon
 } from '@heroicons/react/24/outline'
 import { getAllBookings, createAdminInvitation, getAdminInvitations, resendAdminInvitation, revokeAdminInvitation, updateBookingStatus, getAdminStats } from '../utils/api'
 import UserManagement from '../components/UserManagement'
+import AdminSidebar, { MobileMenuButton } from '../components/AdminSidebar'
 
 const AdminPanel = () => {
-  const [activeTab, setActiveTab] = useState('overview')
+  const location = useLocation()
+  const navigate = useNavigate()
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  // Get active tab from URL params
+  const params = new URLSearchParams(location.search)
+  const activeTab = params.get('tab') || 'overview'
   const [bookings, setBookings] = useState([])
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState({
@@ -272,86 +282,91 @@ const AdminPanel = () => {
     }
   }
 
-  const tabs = [
-    { id: 'overview', name: 'Overview', icon: ChartBarIcon },
-    { id: 'bookings', name: 'Bookings', icon: CalendarIcon },
-    { id: 'users', name: 'Users', icon: UsersIcon },
-    { id: 'invitations', name: 'Admin Invitations', icon: UsersIcon },
-    { id: 'categories', name: 'Categories', icon: EyeIcon },
-  ]
 
   const renderOverview = () => (
     <div className="space-y-6">
+      {/* Page Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+        <p className="text-gray-600 dark:text-gray-400 mt-1">Welcome to your admin dashboard</p>
+      </div>
+
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div className="bg-white dark:bg-black rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-          <div className="flex items-center">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <UsersIcon className="w-6 h-6 text-blue-600" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
+        {/* Total Users */}
+        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 text-white transform hover:scale-105">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-blue-100 text-sm font-medium mb-1">Total Users</p>
+              <p className="text-3xl font-bold">{stats.totalUsers}</p>
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Users</p>
-              <p className="text-2xl font-semibold text-gray-900 dark:text-white">{stats.totalUsers}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-black rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-          <div className="flex items-center">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <EyeIcon className="w-6 h-6 text-green-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Listings</p>
-              <p className="text-2xl font-semibold text-gray-900 dark:text-white">{stats.totalListings}</p>
+            <div className="bg-white/20 backdrop-blur-sm p-3 rounded-xl">
+              <UsersIcon className="w-8 h-8" />
             </div>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-black rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-          <div className="flex items-center">
-            <div className="p-2 bg-purple-100 dark:bg-gray-900 rounded-lg">
-              <CalendarIcon className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+        {/* Total Listings */}
+        <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 text-white transform hover:scale-105">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-green-100 text-sm font-medium mb-1">Total Listings</p>
+              <p className="text-3xl font-bold">{stats.totalListings}</p>
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Bookings</p>
-              <p className="text-2xl font-semibold text-gray-900 dark:text-white">{stats.totalBookings}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-black rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-          <div className="flex items-center">
-            <div className="p-2 bg-yellow-100 dark:bg-gray-900 rounded-lg">
-              <ExclamationTriangleIcon className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Pending Bookings</p>
-              <p className="text-2xl font-semibold text-gray-900 dark:text-white">{stats.pendingBookings}</p>
+            <div className="bg-white/20 backdrop-blur-sm p-3 rounded-xl">
+              <EyeIcon className="w-8 h-8" />
             </div>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-black rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-          <div className="flex items-center">
-            <div className="p-2 bg-blue-100 dark:bg-gray-900 rounded-lg">
-              <CheckCircleIcon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+        {/* Total Bookings */}
+        <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 text-white transform hover:scale-105">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-purple-100 text-sm font-medium mb-1">Total Bookings</p>
+              <p className="text-3xl font-bold">{stats.totalBookings}</p>
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Active Bookings</p>
-              <p className="text-2xl font-semibold text-gray-900 dark:text-white">{stats.activeBookings}</p>
+            <div className="bg-white/20 backdrop-blur-sm p-3 rounded-xl">
+              <CalendarIcon className="w-8 h-8" />
             </div>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-black rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-          <div className="flex items-center">
-            <div className="p-2 bg-green-100 dark:bg-gray-900 rounded-lg">
-              <XCircleIcon className="w-6 h-6 text-green-600 dark:text-green-400" />
+        {/* Pending Bookings */}
+        <div className="bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 text-white transform hover:scale-105">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-yellow-100 text-sm font-medium mb-1">Pending</p>
+              <p className="text-3xl font-bold">{stats.pendingBookings}</p>
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Completed Bookings</p>
-              <p className="text-2xl font-semibold text-gray-900 dark:text-white">{stats.completedBookings}</p>
+            <div className="bg-white/20 backdrop-blur-sm p-3 rounded-xl">
+              <ExclamationTriangleIcon className="w-8 h-8" />
+            </div>
+          </div>
+        </div>
+
+        {/* Active Bookings */}
+        <div className="bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 text-white transform hover:scale-105">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-cyan-100 text-sm font-medium mb-1">Active</p>
+              <p className="text-3xl font-bold">{stats.activeBookings}</p>
+            </div>
+            <div className="bg-white/20 backdrop-blur-sm p-3 rounded-xl">
+              <CheckCircleIcon className="w-8 h-8" />
+            </div>
+          </div>
+        </div>
+
+        {/* Completed Bookings */}
+        <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 text-white transform hover:scale-105">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-emerald-100 text-sm font-medium mb-1">Completed</p>
+              <p className="text-3xl font-bold">{stats.completedBookings}</p>
+            </div>
+            <div className="bg-white/20 backdrop-blur-sm p-3 rounded-xl">
+              <CheckBadgeIcon className="w-8 h-8" />
             </div>
           </div>
         </div>
@@ -936,49 +951,27 @@ const AdminPanel = () => {
   )
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-black">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Admin Panel</h1>
-          <p className="text-gray-600">Manage your Rentify platform</p>
-        </div>
+    <>
+      <AdminSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <MobileMenuButton onClick={() => setSidebarOpen(true)} />
 
-        {/* Tabs */}
-        <div className="border-b border-gray-200 mb-8">
-          <nav className="-mb-px flex space-x-8">
-            {tabs.map((tab) => {
-              const Icon = tab.icon
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center space-x-2 py-2 px-1 border-b-2 font-medium text-sm ${activeTab === tab.id
-                    ? 'border-primary-500 text-primary-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    }`}
-                >
-                  <Icon className="w-5 h-5" />
-                  <span>{tab.name}</span>
-                </button>
-              )
-            })}
-          </nav>
-        </div>
-
-        {/* Tab Content */}
-        <div>
-          {activeTab === 'overview' && renderOverview()}
-          {activeTab === 'bookings' && renderBookings()}
-          {activeTab === 'users' && renderUsers()}
-          {activeTab === 'invitations' && renderAdminInvitations()}
-          {activeTab === 'categories' && renderCategories()}
+      <div className="min-h-screen bg-gray-50 dark:bg-black lg:pl-64">
+        <div className="p-4 sm:p-6 lg:p-8">
+          {/* Content Area */}
+          <div>
+            {activeTab === 'overview' && renderOverview()}
+            {activeTab === 'bookings' && renderBookings()}
+            {activeTab === 'users' && renderUsers()}
+            {activeTab === 'invitations' && renderAdminInvitations()}
+            {activeTab === 'categories' && renderCategories()}
+          </div>
         </div>
       </div>
 
       {/* Modals */}
       {showBookingModal && renderBookingModal()}
       {showRejectModal && renderRejectModal()}
-    </div>
+    </>
   )
 }
 
