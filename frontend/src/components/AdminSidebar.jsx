@@ -61,17 +61,17 @@ const AdminSidebar = ({ isOpen, onClose }) => {
 
     return (
         <>
-            {/* Mobile overlay */}
+            {/* Mobile overlay - Darker for better contrast */}
             {isOpen && (
                 <div
-                    className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+                    className="fixed inset-0 bg-black bg-opacity-70 z-40 lg:hidden transition-opacity duration-200"
                     onClick={onClose}
                 />
             )}
 
             {/* Sidebar */}
             <aside
-                className={`fixed top-0 left-0 h-screen w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 z-50 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'
+                className={`fixed top-0 left-0 h-screen w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 z-50 transform transition-transform duration-200 ease-out shadow-2xl ${isOpen ? 'translate-x-0' : '-translate-x-full'
                     } lg:translate-x-0`}
             >
                 {/* Header */}
@@ -105,8 +105,8 @@ const AdminSidebar = ({ isOpen, onClose }) => {
                                         onClose()
                                     }
                                 }}
-                                className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 group ${active
-                                        ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400'
+                                className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-150 group ${active
+                                        ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 shadow-md'
                                         : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
                                     }`}
                             >

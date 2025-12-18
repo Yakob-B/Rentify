@@ -292,80 +292,80 @@ const AdminPanel = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-5">
         {/* Total Users */}
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 text-white transform hover:scale-105">
+        <div className="bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-600 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-200 p-6 text-white transform hover:scale-105 hover:-translate-y-1">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-blue-100 text-sm font-medium mb-1">Total Users</p>
               <p className="text-3xl font-bold">{stats.totalUsers}</p>
             </div>
-            <div className="bg-white/20 backdrop-blur-sm p-3 rounded-xl">
+            <div className="bg-white/25 backdrop-blur-sm p-3 rounded-xl">
               <UsersIcon className="w-8 h-8" />
             </div>
           </div>
         </div>
 
         {/* Total Listings */}
-        <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 text-white transform hover:scale-105">
+        <div className="bg-gradient-to-br from-green-500 via-green-600 to-teal-600 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-200 p-6 text-white transform hover:scale-105 hover:-translate-y-1">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-green-100 text-sm font-medium mb-1">Total Listings</p>
               <p className="text-3xl font-bold">{stats.totalListings}</p>
             </div>
-            <div className="bg-white/20 backdrop-blur-sm p-3 rounded-xl">
+            <div className="bg-white/25 backdrop-blur-sm p-3 rounded-xl">
               <EyeIcon className="w-8 h-8" />
             </div>
           </div>
         </div>
 
         {/* Total Bookings */}
-        <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 text-white transform hover:scale-105">
+        <div className="bg-gradient-to-br from-purple-500 via-purple-600 to-pink-600 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-200 p-6 text-white transform hover:scale-105 hover:-translate-y-1">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-purple-100 text-sm font-medium mb-1">Total Bookings</p>
               <p className="text-3xl font-bold">{stats.totalBookings}</p>
             </div>
-            <div className="bg-white/20 backdrop-blur-sm p-3 rounded-xl">
+            <div className="bg-white/25 backdrop-blur-sm p-3 rounded-xl">
               <CalendarIcon className="w-8 h-8" />
             </div>
           </div>
         </div>
 
         {/* Pending Bookings */}
-        <div className="bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 text-white transform hover:scale-105">
+        <div className="bg-gradient-to-br from-yellow-500 via-amber-500 to-orange-500 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-200 p-6 text-white transform hover:scale-105 hover:-translate-y-1">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-yellow-100 text-sm font-medium mb-1">Pending</p>
               <p className="text-3xl font-bold">{stats.pendingBookings}</p>
             </div>
-            <div className="bg-white/20 backdrop-blur-sm p-3 rounded-xl">
+            <div className="bg-white/25 backdrop-blur-sm p-3 rounded-xl">
               <ExclamationTriangleIcon className="w-8 h-8" />
             </div>
           </div>
         </div>
 
         {/* Active Bookings */}
-        <div className="bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 text-white transform hover:scale-105">
+        <div className="bg-gradient-to-br from-cyan-500 via-sky-500 to-blue-500 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-200 p-6 text-white transform hover:scale-105 hover:-translate-y-1">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-cyan-100 text-sm font-medium mb-1">Active</p>
               <p className="text-3xl font-bold">{stats.activeBookings}</p>
             </div>
-            <div className="bg-white/20 backdrop-blur-sm p-3 rounded-xl">
+            <div className="bg-white/25 backdrop-blur-sm p-3 rounded-xl">
               <CheckCircleIcon className="w-8 h-8" />
             </div>
           </div>
         </div>
 
         {/* Completed Bookings */}
-        <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 text-white transform hover:scale-105">
+        <div className="bg-gradient-to-br from-emerald-500 via-green-500 to-teal-500 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-200 p-6 text-white transform hover:scale-105 hover:-translate-y-1">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-emerald-100 text-sm font-medium mb-1">Completed</p>
               <p className="text-3xl font-bold">{stats.completedBookings}</p>
             </div>
-            <div className="bg-white/20 backdrop-blur-sm p-3 rounded-xl">
+            <div className="bg-white/25 backdrop-blur-sm p-3 rounded-xl">
               <CheckBadgeIcon className="w-8 h-8" />
             </div>
           </div>
@@ -373,12 +373,13 @@ const AdminPanel = () => {
       </div>
 
       {/* Recent Activity */}
-      <div className="bg-white dark:bg-black rounded-lg shadow-sm border border-gray-200 dark:border-gray-800">
-        <div className="p-6 border-b border-gray-200 dark:border-gray-800">
+      <div className="bg-white dark:bg-black rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
+        <div className="p-6 border-b border-gray-200 dark:border-gray-800 bg-gradient-to-r from-gray-50 to-white dark:from-gray-900 dark:to-black">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Activity</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Latest updates and actions</p>
         </div>
         <div className="p-6">
-          <div className="space-y-4">
+          <div className="space-y-5">
             {loading ? (
               [...Array(5)].map((_, i) => (
                 <div key={i} className="animate-pulse">
@@ -388,40 +389,99 @@ const AdminPanel = () => {
               ))
             ) : (
               <>
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    New user <span className="font-medium text-gray-900 dark:text-white">John Doe</span> registered
-                  </p>
-                  <span className="text-xs text-gray-500 dark:text-gray-500 ml-auto">2 minutes ago</span>
+                <div className="group hover:bg-gray-50 dark:hover:bg-gray-900/50 p-3 rounded-xl transition-colors">
+                  <div className="flex items-start space-x-3">
+                    <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-green-400 to-emerald-500 rounded-xl flex items-center justify-center">
+                      <UsersIcon className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        New user <span className="font-semibold text-gray-900 dark:text-white">John Doe</span> registered
+                      </p>
+                      <div className="flex items-center mt-2 space-x-3">
+                        <div className="flex-1 bg-gray-200 dark:bg-gray-800 rounded-full h-1.5">
+                          <div className="bg-gradient-to-r from-green-400 to-emerald-500 h-1.5 rounded-full" style={{ width: '100%' }}></div>
+                        </div>
+                        <span className="text-xs text-gray-500 dark:text-gray-500 whitespace-nowrap">2 min ago</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    New listing <span className="font-medium text-gray-900 dark:text-white">"Vintage Camera"</span> created
-                  </p>
-                  <span className="text-xs text-gray-500 dark:text-gray-500 ml-auto">15 minutes ago</span>
+
+                <div className="group hover:bg-gray-50 dark:hover:bg-gray-900/50 p-3 rounded-xl transition-colors">
+                  <div className="flex items-start space-x-3">
+                    <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-xl flex items-center justify-center">
+                      <EyeIcon className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        New listing <span className="font-semibold text-gray-900 dark:text-white">"Vintage Camera"</span> created
+                      </p>
+                      <div className="flex items-center mt-2 space-x-3">
+                        <div className="flex-1 bg-gray-200 dark:bg-gray-800 rounded-full h-1.5">
+                          <div className="bg-gradient-to-r from-blue-400 to-indigo-500 h-1.5 rounded-full" style={{ width: '85%' }}></div>
+                        </div>
+                        <span className="text-xs text-gray-500 dark:text-gray-500 whitespace-nowrap">15 min ago</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Booking request pending for <span className="font-medium text-gray-900 dark:text-white">"Mountain Bike"</span>
-                  </p>
-                  <span className="text-xs text-gray-500 dark:text-gray-500 ml-auto">1 hour ago</span>
+
+                <div className="group hover:bg-gray-50 dark:hover:bg-gray-900/50 p-3 rounded-xl transition-colors">
+                  <div className="flex items-start space-x-3">
+                    <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl flex items-center justify-center">
+                      <ExclamationTriangleIcon className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Booking request pending for <span className="font-semibold text-gray-900 dark:text-white">"Mountain Bike"</span>
+                      </p>
+                      <div className="flex items-center mt-2 space-x-3">
+                        <div className="flex-1 bg-gray-200 dark:bg-gray-800 rounded-full h-1.5">
+                          <div className="bg-gradient-to-r from-yellow-400 to-orange-500 h-1.5 rounded-full" style={{ width: '60%' }}></div>
+                        </div>
+                        <span className="text-xs text-gray-500 dark:text-gray-500 whitespace-nowrap">1 hour ago</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Booking approved for <span className="font-medium text-gray-900 dark:text-white">"Party Tent"</span>
-                  </p>
-                  <span className="text-xs text-gray-500 dark:text-gray-500 ml-auto">2 hours ago</span>
+
+                <div className="group hover:bg-gray-50 dark:hover:bg-gray-900/50 p-3 rounded-xl transition-colors">
+                  <div className="flex items-start space-x-3">
+                    <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-green-400 to-teal-500 rounded-xl flex items-center justify-center">
+                      <CheckCircleIcon className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Booking approved for <span className="font-semibold text-gray-900 dark:text-white">"Party Tent"</span>
+                      </p>
+                      <div className="flex items-center mt-2 space-x-3">
+                        <div className="flex-1 bg-gray-200 dark:bg-gray-800 rounded-full h-1.5">
+                          <div className="bg-gradient-to-r from-green-400 to-teal-500 h-1.5 rounded-full" style={{ width: '100%' }}></div>
+                        </div>
+                        <span className="text-xs text-gray-500 dark:text-gray-500 whitespace-nowrap">2 hours ago</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-red-400 rounded-full"></div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Listing <span className="font-medium text-gray-900 dark:text-white">"Old Furniture"</span> reported
-                  </p>
-                  <span className="text-xs text-gray-500 dark:text-gray-500 ml-auto">3 hours ago</span>
+
+                <div className="group hover:bg-gray-50 dark:hover:bg-gray-900/50 p-3 rounded-xl transition-colors">
+                  <div className="flex items-start space-x-3">
+                    <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-red-400 to-pink-500 rounded-xl flex items-center justify-center">
+                      <XCircleIcon className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Listing <span className="font-semibold text-gray-900 dark:text-white">"Old Furniture"</span> reported
+                      </p>
+                      <div className="flex items-center mt-2 space-x-3">
+                        <div className="flex-1 bg-gray-200 dark:bg-gray-800 rounded-full h-1.5">
+                          <div className="bg-gradient-to-r from-red-400 to-pink-500 h-1.5 rounded-full" style={{ width: '40%' }}></div>
+                        </div>
+                        <span className="text-xs text-gray-500 dark:text-gray-500 whitespace-nowrap">3 hours ago</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </>
             )}
