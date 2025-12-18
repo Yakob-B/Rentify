@@ -1,5 +1,4 @@
 const { enhanceDescription, isAIServiceAvailable } = require('../services/aiService');
-const { getErrorMessage } = require('../utils/errors');
 
 /**
  * @desc    Enhance listing description using AI
