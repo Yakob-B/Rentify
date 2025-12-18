@@ -1,26 +1,28 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
-import { 
+import {
   PhotoIcon,
   MapPinIcon,
   CurrencyDollarIcon,
-  CalendarIcon
+  CalendarIcon,
+  SparklesIcon
 } from '@heroicons/react/24/outline'
 import toast from 'react-hot-toast'
-import { getCategories, createListing, updateListing, getListingById, uploadListingImages } from '../utils/api'
+import { getCategories, createListing, updateListing, getListingById, uploadListingImages, enhanceDescription } from '../utils/api'
 import { getErrorMessage } from '../utils/errors'
 
 const ListingForm = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const isEdit = Boolean(id)
-  
+
   const [categories, setCategories] = useState([])
   const [loading, setLoading] = useState(false)
   const [images, setImages] = useState([])
   const [uploading, setUploading] = useState(false)
-  
+  const [enhancing, setEnhancing] = useState(false)
+
   const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm({
     defaultValues: {
       title: '',
@@ -47,7 +49,7 @@ const ListingForm = () => {
       try {
         const categoriesData = await getCategories()
         setCategories(categoriesData)
-        
+
         if (isEdit) {
           const listing = await getListingById(id)
           setValue('title', listing.title)
@@ -95,9 +97,56 @@ const ListingForm = () => {
     setImages(newImages)
   }
 
+  const handleAIEnhance = async () => {
+    const currentDescription = watch('description')
+    const currentTitle = watch('title')
+    const currentCategory = watch('category')
+    const currentFeatures = watch('features')
+
+    // Validate description exists
+    if (!currentDescription || currentDescription.trim().length === 0) {
+      toast.error('Please enter a description first')
+      return
+    }
+
+    try {
+      setEnhancing(true)
+      toast.loading('AI is enhancing your description...', { id: 'ai-enhance' })
+
+      // Get category name if selected
+      let categoryName = ''
+      if (currentCategory) {
+        const selectedCategory = categories.find(cat => cat._id === currentCategory)
+        categoryName = selectedCategory?.name || ''
+      }
+
+      // Parse features if provided
+      const featuresArray = currentFeatures
+        ? currentFeatures.split(',').map(f => f.trim()).filter(f => f)
+        : []
+
+      // Call AI service
+      const response = await enhanceDescription({
+        description: currentDescription,
+        title: currentTitle,
+        category: categoryName,
+        features: featuresArray
+      })
+
+      // Update the description field with enhanced version
+      setValue('description', response.data.enhanced)
+      toast.success('Description enhanced successfully!', { id: 'ai-enhance' })
+    } catch (error) {
+      console.error('AI Enhancement Error:', error)
+      toast.error(getErrorMessage(error, 'Failed to enhance description'), { id: 'ai-enhance' })
+    } finally {
+      setEnhancing(false)
+    }
+  }
+
   const onSubmit = async (data) => {
     setLoading(true)
-    
+
     try {
       const listingData = {
         ...data,
@@ -112,7 +161,7 @@ const ListingForm = () => {
         await createListing(listingData)
         toast.success('Listing created successfully!')
       }
-      
+
       navigate('/dashboard')
     } catch (error) {
       toast.error(getErrorMessage(error, 'Error saving listing'))
@@ -136,7 +185,7 @@ const ListingForm = () => {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h2>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -155,9 +204,20 @@ const ListingForm = () => {
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Description *
-                </label>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Description *
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleAIEnhance}
+                    disabled={enhancing || !watch('description')}
+                    className="flex items-center space-x-1 px-3 py-1.5 text-sm font-medium text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-purple-200"
+                  >
+                    <SparklesIcon className="w-4 h-4" />
+                    <span>{enhancing ? 'Enhancing...' : 'Improve with AI'}</span>
+                  </button>
+                </div>
                 <textarea
                   {...register('description', { required: 'Description is required' })}
                   rows={4}
@@ -198,7 +258,7 @@ const ListingForm = () => {
                     Price *
                   </label>
                   <input
-                    {...register('price', { 
+                    {...register('price', {
                       required: 'Price is required',
                       min: { value: 0, message: 'Price must be positive' }
                     })}
@@ -233,7 +293,7 @@ const ListingForm = () => {
 
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Location</h2>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -299,7 +359,7 @@ const ListingForm = () => {
 
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Availability</h2>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -335,7 +395,7 @@ const ListingForm = () => {
 
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Images</h2>
-            
+
             <div className="space-y-4">
               <div className="flex items-center justify-center w-full">
                 <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
@@ -381,7 +441,7 @@ const ListingForm = () => {
 
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Features</h2>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Key Features

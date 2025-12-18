@@ -159,4 +159,8 @@ export const getUserFavorites = (params = {}) => {
 export const checkFavorite = (listingId) => api.get(`/favorites/check/${listingId}`)
 export const checkMultipleFavorites = (listingIds) => api.post('/favorites/check-multiple', { listingIds })
 
+// AI API
+export const getAIServiceStatus = () => api.get('/ai/status')
+export const enhanceDescription = (descriptionData) => api.post('/ai/enhance-description', descriptionData)
+
 export default api
