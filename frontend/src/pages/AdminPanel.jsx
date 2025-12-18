@@ -286,9 +286,12 @@ const AdminPanel = () => {
   const renderOverview = () => (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-1">Welcome to your admin dashboard</p>
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">Welcome to your admin dashboard</p>
+        </div>
+        <MobileMenuButton onClick={() => setSidebarOpen(true)} />
       </div>
 
       {/* Stats Cards */}
@@ -1013,7 +1016,6 @@ const AdminPanel = () => {
   return (
     <>
       <AdminSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      <MobileMenuButton onClick={() => setSidebarOpen(true)} />
 
       <div className="min-h-screen bg-gray-50 dark:bg-black lg:pl-64">
         <div className="p-4 sm:p-6 lg:p-8">

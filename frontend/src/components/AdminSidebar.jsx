@@ -76,12 +76,7 @@ const AdminSidebar = ({ isOpen, onClose }) => {
             >
                 {/* Header */}
                 <div className="h-16 flex items-center justify-between px-6 border-b border-gray-200 dark:border-gray-800">
-                    <div className="flex items-center space-x-2">
-                        <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-700 rounded-lg flex items-center justify-center">
-                            <span className="text-white font-bold text-sm">R</span>
-                        </div>
-                        <span className="text-xl font-bold text-gray-900 dark:text-white">Rentify</span>
-                    </div>
+                    <h2 className="text-lg font-bold text-gray-900 dark:text-white">Admin Panel</h2>
                     <button
                         onClick={onClose}
                         className="lg:hidden p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
@@ -106,8 +101,8 @@ const AdminSidebar = ({ isOpen, onClose }) => {
                                     }
                                 }}
                                 className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-150 group ${active
-                                        ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 shadow-md'
-                                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                                    ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 shadow-md'
+                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
                                     }`}
                             >
                                 <Icon
@@ -140,7 +135,7 @@ const AdminSidebar = ({ isOpen, onClose }) => {
 export const MobileMenuButton = ({ onClick }) => (
     <button
         onClick={onClick}
-        className="lg:hidden fixed top-4 left-4 z-30 p-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+        className="lg:hidden p-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
     >
         <Bars3Icon className="w-6 h-6 text-gray-700 dark:text-gray-300" />
     </button>
