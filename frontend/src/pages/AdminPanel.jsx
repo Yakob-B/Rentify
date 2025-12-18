@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import toast from 'react-hot-toast'
 import { getErrorMessage } from '../utils/errors'
 import { getCategories, createCategory, updateCategory, deleteCategory } from '../utils/api'
-import { 
+import {
   UsersIcon,
   EyeIcon,
   CalendarIcon,
@@ -114,7 +114,7 @@ const AdminPanel = () => {
     try {
       const response = await createAdminInvitation(invitationForm)
       setInvitations(prev => [response.invitation, ...prev])
-      
+
       if (response.emailSent) {
         toast.success('Admin invitation created and email sent successfully!')
       } else {
@@ -125,7 +125,7 @@ const AdminPanel = () => {
         console.warn('Email sending failed:', response.emailError)
         console.log('Invitation URL:', response.invitation.invitationUrl)
       }
-      
+
       setInvitationForm({ name: '', email: '' })
     } catch (err) {
       toast.error(getErrorMessage(err, 'Failed to send invitation'))
@@ -141,7 +141,7 @@ const AdminPanel = () => {
     } catch (err) {
       const errorMessage = getErrorMessage(err, 'Failed to resend invitation')
       toast.error(errorMessage, { duration: 6000 })
-      
+
       // If email config error, show helpful message
       if (err.response?.data?.message?.includes('not configured')) {
         console.error('Email configuration error. Please check EMAIL_USER and EMAIL_PASSWORD environment variables.')
@@ -162,7 +162,7 @@ const AdminPanel = () => {
     if (!window.confirm('Revoke this invitation?')) return
     try {
       await revokeAdminInvitation(id)
-      setInvitations(prev => prev.map(inv => 
+      setInvitations(prev => prev.map(inv =>
         inv._id === id ? { ...inv, status: 'revoked' } : inv
       ))
       toast.success('Invitation revoked')
@@ -255,9 +255,9 @@ const AdminPanel = () => {
     if (!selectedBooking) return
     setProcessingBooking(true)
     try {
-      await updateBookingStatus(selectedBooking._id, { 
+      await updateBookingStatus(selectedBooking._id, {
         status: 'rejected',
-        message: rejectReason 
+        message: rejectReason
       })
       const bookingsData = await getAllBookings()
       setBookings(bookingsData.bookings || [])
@@ -310,103 +310,103 @@ const AdminPanel = () => {
 
         <div className="bg-white dark:bg-black rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-6">
           <div className="flex items-center">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <CalendarIcon className="w-6 h-6 text-purple-600" />
+            <div className="p-2 bg-purple-100 dark:bg-gray-900 rounded-lg">
+              <CalendarIcon className="w-6 h-6 text-purple-600 dark:text-purple-400" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Bookings</p>
-              <p className="text-2xl font-semibold text-gray-900">{stats.totalBookings}</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Bookings</p>
+              <p className="text-2xl font-semibold text-gray-900 dark:text-white">{stats.totalBookings}</p>
             </div>
           </div>
         </div>
 
         <div className="bg-white dark:bg-black rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-6">
           <div className="flex items-center">
-            <div className="p-2 bg-yellow-100 rounded-lg">
-              <ExclamationTriangleIcon className="w-6 h-6 text-yellow-600" />
+            <div className="p-2 bg-yellow-100 dark:bg-gray-900 rounded-lg">
+              <ExclamationTriangleIcon className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Pending Bookings</p>
-              <p className="text-2xl font-semibold text-gray-900">{stats.pendingBookings}</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Pending Bookings</p>
+              <p className="text-2xl font-semibold text-gray-900 dark:text-white">{stats.pendingBookings}</p>
             </div>
           </div>
         </div>
 
         <div className="bg-white dark:bg-black rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-6">
           <div className="flex items-center">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <CheckCircleIcon className="w-6 h-6 text-blue-600" />
+            <div className="p-2 bg-blue-100 dark:bg-gray-900 rounded-lg">
+              <CheckCircleIcon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Active Bookings</p>
-              <p className="text-2xl font-semibold text-gray-900">{stats.activeBookings}</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Active Bookings</p>
+              <p className="text-2xl font-semibold text-gray-900 dark:text-white">{stats.activeBookings}</p>
             </div>
           </div>
         </div>
 
         <div className="bg-white dark:bg-black rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-6">
           <div className="flex items-center">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <XCircleIcon className="w-6 h-6 text-green-600" />
+            <div className="p-2 bg-green-100 dark:bg-gray-900 rounded-lg">
+              <XCircleIcon className="w-6 h-6 text-green-600 dark:text-green-400" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Completed Bookings</p>
-              <p className="text-2xl font-semibold text-gray-900">{stats.completedBookings}</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Completed Bookings</p>
+              <p className="text-2xl font-semibold text-gray-900 dark:text-white">{stats.completedBookings}</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Recent Activity */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div className="p-6 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
+      <div className="bg-white dark:bg-black rounded-lg shadow-sm border border-gray-200 dark:border-gray-800">
+        <div className="p-6 border-b border-gray-200 dark:border-gray-800">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Activity</h3>
         </div>
         <div className="p-6">
           <div className="space-y-4">
             {loading ? (
               [...Array(5)].map((_, i) => (
                 <div key={i} className="animate-pulse">
-                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                  <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                  <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-3/4 mb-2"></div>
+                  <div className="h-3 bg-gray-200 dark:bg-gray-800 rounded w-1/2"></div>
                 </div>
               ))
             ) : (
               <>
                 <div className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                  <p className="text-sm text-gray-600">
-                    New user <span className="font-medium text-gray-900">John Doe</span> registered
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    New user <span className="font-medium text-gray-900 dark:text-white">John Doe</span> registered
                   </p>
-                  <span className="text-xs text-gray-500 ml-auto">2 minutes ago</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-500 ml-auto">2 minutes ago</span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                  <p className="text-sm text-gray-600">
-                    New listing <span className="font-medium text-gray-900">"Vintage Camera"</span> created
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    New listing <span className="font-medium text-gray-900 dark:text-white">"Vintage Camera"</span> created
                   </p>
-                  <span className="text-xs text-gray-500 ml-auto">15 minutes ago</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-500 ml-auto">15 minutes ago</span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
-                  <p className="text-sm text-gray-600">
-                    Booking request pending for <span className="font-medium text-gray-900">"Mountain Bike"</span>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Booking request pending for <span className="font-medium text-gray-900 dark:text-white">"Mountain Bike"</span>
                   </p>
-                  <span className="text-xs text-gray-500 ml-auto">1 hour ago</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-500 ml-auto">1 hour ago</span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                  <p className="text-sm text-gray-600">
-                    Booking approved for <span className="font-medium text-gray-900">"Party Tent"</span>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Booking approved for <span className="font-medium text-gray-900 dark:text-white">"Party Tent"</span>
                   </p>
-                  <span className="text-xs text-gray-500 ml-auto">2 hours ago</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-500 ml-auto">2 hours ago</span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-red-400 rounded-full"></div>
-                  <p className="text-sm text-gray-600">
-                    Listing <span className="font-medium text-gray-900">"Old Furniture"</span> reported
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Listing <span className="font-medium text-gray-900 dark:text-white">"Old Furniture"</span> reported
                   </p>
-                  <span className="text-xs text-gray-500 ml-auto">3 hours ago</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-500 ml-auto">3 hours ago</span>
                 </div>
               </>
             )}
@@ -418,38 +418,38 @@ const AdminPanel = () => {
 
   const renderBookings = () => (
     <div className="space-y-6">
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div className="p-6 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">All Bookings</h3>
+      <div className="bg-white dark:bg-black rounded-lg shadow-sm border border-gray-200 dark:border-gray-800">
+        <div className="p-6 border-b border-gray-200 dark:border-gray-800">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">All Bookings</h3>
         </div>
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+            <thead className="bg-gray-50 dark:bg-gray-900">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Listing
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Renter
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Owner
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Dates
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Amount
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white dark:bg-black divide-y divide-gray-200 dark:divide-gray-800">
               {loading ? (
                 [...Array(5)].map((_, i) => (
                   <tr key={i}>
@@ -464,42 +464,41 @@ const AdminPanel = () => {
                 bookings.map((booking) => (
                   <tr key={booking._id}>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{booking.listing.title}</div>
+                      <div className="text-sm font-medium text-gray-900 dark:text-white">{booking.listing.title}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{booking.renter.name}</div>
-                      <div className="text-sm text-gray-500">{booking.renter.email}</div>
+                      <div className="text-sm text-gray-900 dark:text-white">{booking.renter.name}</div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">{booking.renter.email}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{booking.owner.name}</div>
-                      <div className="text-sm text-gray-500">{booking.owner.email}</div>
+                      <div className="text-sm text-gray-900 dark:text-white">{booking.owner.name}</div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">{booking.owner.email}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
+                      <div className="text-sm text-gray-900 dark:text-white">
                         {new Date(booking.startDate).toLocaleDateString()}
                       </div>
-                      <div className="text-sm text-gray-500">
+                      <div className="text-sm text-gray-500 dark:text-gray-400">
                         to {new Date(booking.endDate).toLocaleDateString()}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">${booking.totalAmount}</div>
+                      <div className="text-sm font-medium text-gray-900 dark:text-white">${booking.totalAmount}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        booking.status === 'approved' 
-                          ? 'bg-green-100 text-green-800'
-                          : booking.status === 'pending'
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${booking.status === 'approved'
+                        ? 'bg-green-100 text-green-800'
+                        : booking.status === 'pending'
                           ? 'bg-yellow-100 text-yellow-800'
                           : booking.status === 'rejected'
-                          ? 'bg-red-100 text-red-800'
-                          : 'bg-gray-100 text-gray-800'
-                      }`}>
+                            ? 'bg-red-100 text-red-800'
+                            : 'bg-gray-100 text-gray-800'
+                        }`}>
                         {booking.status}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button 
+                      <button
                         onClick={() => handleViewBooking(booking)}
                         className="text-primary-600 hover:text-primary-900 mr-3 transition-colors"
                       >
@@ -507,14 +506,14 @@ const AdminPanel = () => {
                       </button>
                       {booking.status === 'pending' && (
                         <>
-                          <button 
+                          <button
                             onClick={() => handleApproveBooking(booking._id)}
                             disabled={processingBooking}
                             className="text-green-600 hover:text-green-900 mr-3 transition-colors disabled:opacity-50"
                           >
                             Approve
                           </button>
-                          <button 
+                          <button
                             onClick={() => handleRejectBooking(booking)}
                             disabled={processingBooking}
                             className="text-red-600 hover:text-red-900 transition-colors disabled:opacity-50"
@@ -571,9 +570,9 @@ const AdminPanel = () => {
                 required
                 className="input-field dark:bg-gray-900 dark:border-gray-700 dark:text-white"
               />
-              <button 
-                type="submit" 
-                disabled={savingInvitation} 
+              <button
+                type="submit"
+                disabled={savingInvitation}
                 className="btn-primary whitespace-nowrap disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {savingInvitation ? (
@@ -620,7 +619,7 @@ const AdminPanel = () => {
                   invitations.map((inv) => {
                     const isExpired = new Date(inv.expiresAt) < new Date()
                     const invitationUrl = `${window.location.origin}/admin/register/${inv.token}`
-                    
+
                     return (
                       <tr key={inv._id} className="hover:bg-gray-50 dark:hover:bg-gray-900">
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{inv.name}</td>
@@ -693,9 +692,9 @@ const AdminPanel = () => {
   const renderCategories = () => {
     return (
       <div className="space-y-6">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="p-6 border-b border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900">Categories</h3>
+        <div className="bg-white dark:bg-black rounded-lg shadow-sm border border-gray-200 dark:border-gray-800">
+          <div className="p-6 border-b border-gray-200 dark:border-gray-800">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Categories</h3>
           </div>
           <div className="p-6">
             <form onSubmit={handleCategorySubmit} className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
@@ -736,28 +735,28 @@ const AdminPanel = () => {
             </form>
 
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+                <thead className="bg-gray-50 dark:bg-gray-900">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Icon</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Name</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Description</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Icon</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Image</th>
                     <th className="px-6 py-3" />
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white dark:bg-black divide-y divide-gray-200 dark:divide-gray-800">
                   {loadingCats ? (
                     <tr>
                       <td colSpan="5" className="px-6 py-4">Loading...</td>
                     </tr>
                   ) : categories.length ? (
                     categories.map((cat) => (
-                      <tr key={cat._id}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{cat.name}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{cat.description}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{cat.icon}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                      <tr key={cat._id} className="hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{cat.name}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{cat.description}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{cat.icon}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                           {cat.image ? <img src={cat.image} alt={cat.name} className="h-10 w-16 object-cover rounded" /> : '—'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-3">
@@ -795,15 +794,15 @@ const AdminPanel = () => {
               <XMarkIcon className="w-6 h-6" />
             </button>
           </div>
-          
+
           <div className="p-6 space-y-6">
             {/* Listing Info */}
             <div>
               <h4 className="font-semibold text-gray-900 mb-2">Listing</h4>
               <p className="text-gray-700">{selectedBooking.listing.title}</p>
               {selectedBooking.listing.images?.[0] && (
-                <img 
-                  src={selectedBooking.listing.images[0]} 
+                <img
+                  src={selectedBooking.listing.images[0]}
                   alt={selectedBooking.listing.title}
                   className="mt-2 w-full h-48 object-cover rounded-lg"
                 />
@@ -853,15 +852,14 @@ const AdminPanel = () => {
             {/* Status */}
             <div>
               <h4 className="font-semibold text-gray-900 mb-1">Status</h4>
-              <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${
-                selectedBooking.status === 'approved' 
-                  ? 'bg-green-100 text-green-800'
-                  : selectedBooking.status === 'pending'
+              <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${selectedBooking.status === 'approved'
+                ? 'bg-green-100 text-green-800'
+                : selectedBooking.status === 'pending'
                   ? 'bg-yellow-100 text-yellow-800'
                   : selectedBooking.status === 'rejected'
-                  ? 'bg-red-100 text-red-800'
-                  : 'bg-gray-100 text-gray-800'
-              }`}>
+                    ? 'bg-red-100 text-red-800'
+                    : 'bg-gray-100 text-gray-800'
+                }`}>
                 {selectedBooking.status}
               </span>
             </div>
@@ -903,7 +901,7 @@ const AdminPanel = () => {
         <div className="p-6 border-b border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900">Reject Booking</h3>
         </div>
-        
+
         <div className="p-6">
           <p className="text-gray-600 mb-4">
             Are you sure you want to reject this booking? You can provide a reason below.
@@ -916,7 +914,7 @@ const AdminPanel = () => {
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500"
           />
         </div>
-        
+
         <div className="p-6 border-t border-gray-200 flex justify-end space-x-3">
           <button
             onClick={() => setShowRejectModal(false)}
@@ -954,11 +952,10 @@ const AdminPanel = () => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center space-x-2 py-2 px-1 border-b-2 font-medium text-sm ${
-                    activeTab === tab.id
-                      ? 'border-primary-500 text-primary-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
+                  className={`flex items-center space-x-2 py-2 px-1 border-b-2 font-medium text-sm ${activeTab === tab.id
+                    ? 'border-primary-500 text-primary-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
                 >
                   <Icon className="w-5 h-5" />
                   <span>{tab.name}</span>

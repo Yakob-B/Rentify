@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { getErrorMessage } from '../utils/errors'
-import { 
+import {
   PlusIcon,
   EyeIcon,
   CalendarIcon,
@@ -83,14 +83,14 @@ const DashboardPage = () => {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div className="bg-white dark:bg-black rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-6">
         <div className="flex items-center">
-          <div className="p-2 bg-yellow-100 rounded-lg">
-            <CurrencyDollarIcon className="w-6 h-6 text-yellow-600" />
+          <div className="p-2 bg-yellow-100 dark:bg-gray-900 rounded-lg">
+            <CurrencyDollarIcon className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
           </div>
           <div className="ml-4">
-            <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-            <p className="text-2xl font-semibold text-gray-900">
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Revenue</p>
+            <p className="text-2xl font-semibold text-gray-900 dark:text-white">
               ${bookings
                 .filter(b => b.status === 'approved' || b.status === 'completed')
                 .reduce((sum, b) => sum + b.totalAmount, 0)
@@ -185,7 +185,7 @@ const DashboardPage = () => {
 
     try {
       setActionLoadingId(selectedBookingForPayment._id)
-      
+
       if (paymentMethod === 'stripe') {
         // Stripe payment flow
         const { url } = await createCheckoutSession(selectedBookingForPayment._id)
@@ -199,7 +199,7 @@ const DashboardPage = () => {
             setTelebirrQrCode(result.qrCode)
           }
           toast.success('Payment initiated. Please complete the payment.')
-          
+
           // Poll for payment status
           const checkPaymentStatus = setInterval(async () => {
             try {
@@ -231,7 +231,7 @@ const DashboardPage = () => {
   const renderListings = () => (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold text-gray-900">My Listings</h3>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">My Listings</h3>
         <Link
           to="/listings/new"
           className="btn-primary flex items-center space-x-2"
@@ -244,12 +244,12 @@ const DashboardPage = () => {
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[...Array(6)].map((_, i) => (
-            <div key={i} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden animate-pulse">
-              <div className="h-48 bg-gray-200"></div>
+            <div key={i} className="bg-white dark:bg-black rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden animate-pulse">
+              <div className="h-48 bg-gray-200 dark:bg-gray-800"></div>
               <div className="p-4">
-                <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                <div className="h-3 bg-gray-200 rounded w-3/4 mb-4"></div>
-                <div className="h-6 bg-gray-200 rounded w-1/2"></div>
+                <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded mb-2"></div>
+                <div className="h-3 bg-gray-200 dark:bg-gray-800 rounded w-3/4 mb-4"></div>
+                <div className="h-6 bg-gray-200 dark:bg-gray-800 rounded w-1/2"></div>
               </div>
             </div>
           ))}
@@ -257,7 +257,7 @@ const DashboardPage = () => {
       ) : listings.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {listings.map((listing) => (
-            <div key={listing._id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div key={listing._id} className="bg-white dark:bg-black rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
               <div className="aspect-w-16 aspect-h-9">
                 <img
                   src={listing.images[0] || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300"%3E%3Crect fill="%23f3f4f6" width="400" height="300"/%3E%3Ctext fill="%239ca3af" font-family="system-ui, sans-serif" font-size="18" x="50%25" y="50%25" text-anchor="middle" dominant-baseline="middle"%3ENo Image%3C/text%3E%3C/svg%3E'}
@@ -266,17 +266,16 @@ const DashboardPage = () => {
                 />
               </div>
               <div className="p-4">
-                <h4 className="text-lg font-semibold text-gray-900 mb-2">{listing.title}</h4>
-                <p className="text-gray-600 text-sm mb-3 line-clamp-2">{listing.description}</p>
+                <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{listing.title}</h4>
+                <p className="text-gray-600 dark:text-gray-400 text-sm mb-3 line-clamp-2">{listing.description}</p>
                 <div className="flex items-center justify-between">
-                  <span className="text-xl font-bold text-primary-600">
+                  <span className="text-xl font-bold text-primary-600 dark:text-primary-400">
                     ${listing.price}/{listing.priceUnit}
                   </span>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    listing.status === 'active' 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-gray-100 text-gray-800'
-                  }`}>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${listing.status === 'active'
+                      ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400'
+                      : 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-300'
+                    }`}>
                     {listing.status}
                   </span>
                 </div>
@@ -307,11 +306,11 @@ const DashboardPage = () => {
         </div>
       ) : (
         <div className="text-center py-12">
-          <div className="text-gray-400 mb-4">
+          <div className="text-gray-400 dark:text-gray-600 mb-4">
             <EyeIcon className="w-16 h-16 mx-auto" />
           </div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">No listings yet</h3>
-          <p className="text-gray-600 mb-6">Start earning by listing your items for rent.</p>
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">No listings yet</h3>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">Start earning by listing your items for rent.</p>
           <Link
             to="/listings/new"
             className="btn-primary inline-flex items-center space-x-2"
@@ -327,23 +326,23 @@ const DashboardPage = () => {
   const renderBookings = () => (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-gray-900">Bookings</h3>
-        <div className="inline-flex rounded-md shadow-sm border border-gray-200 overflow-hidden">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Bookings</h3>
+        <div className="inline-flex rounded-md shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
           <button
             onClick={() => setBookingView('owner')}
-            className={`px-3 py-1 text-sm ${bookingView === 'owner' ? 'bg-primary-600 text-white' : 'bg-white text-gray-700'}`}
+            className={`px-3 py-1 text-sm ${bookingView === 'owner' ? 'bg-primary-600 text-white' : 'bg-white dark:bg-black text-gray-700 dark:text-gray-300'}`}
           >
             As Owner
           </button>
           <button
             onClick={() => setBookingView('renter')}
-            className={`px-3 py-1 text-sm ${bookingView === 'renter' ? 'bg-primary-600 text-white' : 'bg-white text-gray-700'}`}
+            className={`px-3 py-1 text-sm ${bookingView === 'renter' ? 'bg-primary-600 text-white' : 'bg-white dark:bg-black text-gray-700 dark:text-gray-300'}`}
           >
             As Renter
           </button>
         </div>
       </div>
-      
+
       {loading ? (
         <div className="space-y-4">
           {[...Array(5)].map((_, i) => (
@@ -357,22 +356,21 @@ const DashboardPage = () => {
       ) : bookings.length > 0 ? (
         <div className="space-y-4">
           {bookings.map((booking) => (
-            <div key={booking._id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div key={booking._id} className="bg-white dark:bg-black rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-6">
               <div className="flex items-center justify-between mb-4">
-                <h4 className="text-lg font-semibold text-gray-900">{booking.listing.title}</h4>
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  booking.status === 'approved' 
-                    ? 'bg-green-100 text-green-800'
+                <h4 className="text-lg font-semibold text-gray-900 dark:text-white">{booking.listing.title}</h4>
+                <span className={`px-3 py-1 rounded-full text-sm font-medium ${booking.status === 'approved'
+                    ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400'
                     : booking.status === 'pending'
-                    ? 'bg-yellow-100 text-yellow-800'
-                    : booking.status === 'rejected'
-                    ? 'bg-red-100 text-red-800'
-                    : 'bg-gray-100 text-gray-800'
-                }`}>
+                      ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400'
+                      : booking.status === 'rejected'
+                        ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400'
+                        : 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-300'
+                  }`}>
                   {booking.status}
                 </span>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <div>
                   <p className="text-sm text-gray-600">Renter</p>
@@ -389,15 +387,15 @@ const DashboardPage = () => {
                   <p className="font-medium text-gray-900">${booking.totalAmount}</p>
                 </div>
               </div>
-              
+
               {booking.message && (
                 <div className="mb-4">
                   <p className="text-sm text-gray-600">Message</p>
                   <p className="text-gray-900">{booking.message}</p>
                 </div>
               )}
-              
-                <div className="flex space-x-2">
+
+              <div className="flex space-x-2">
                 <Link
                   to={`/bookings/${booking._id}`}
                   className="btn-outline"
@@ -472,11 +470,11 @@ const DashboardPage = () => {
         </div>
       ) : (
         <div className="text-center py-12">
-          <div className="text-gray-400 mb-4">
+          <div className="text-gray-400 dark:text-gray-600 mb-4">
             <CalendarIcon className="w-16 h-16 mx-auto" />
           </div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">No bookings yet</h3>
-          <p className="text-gray-600">Your booking requests will appear here.</p>
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">No bookings yet</h3>
+          <p className="text-gray-600 dark:text-gray-400">Your booking requests will appear here.</p>
         </div>
       )}
     </div>
@@ -486,8 +484,8 @@ const DashboardPage = () => {
     <div className="min-h-screen bg-gray-50 dark:bg-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600">Welcome back, {user.name}!</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+          <p className="text-gray-600 dark:text-gray-400">Welcome back, {user.name}!</p>
         </div>
 
         {/* Tabs */}
@@ -499,11 +497,10 @@ const DashboardPage = () => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center space-x-2 py-2 px-1 border-b-2 font-medium text-sm ${
-                    activeTab === tab.id
-                      ? 'border-primary-500 text-primary-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
+                  className={`flex items-center space-x-2 py-2 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === tab.id
+                      ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-700'
+                    }`}
                 >
                   <Icon className="w-5 h-5" />
                   <span>{tab.name}</span>
@@ -539,7 +536,7 @@ const DashboardPage = () => {
                 <XMarkIcon className="w-6 h-6" />
               </button>
             </div>
-            
+
             <div className="p-6">
               {!telebirrPaymentUrl ? (
                 <>
@@ -555,11 +552,10 @@ const DashboardPage = () => {
                   <div className="space-y-3">
                     <button
                       onClick={() => setPaymentMethod('stripe')}
-                      className={`w-full p-4 border-2 rounded-lg flex items-center space-x-3 transition-all ${
-                        paymentMethod === 'stripe'
+                      className={`w-full p-4 border-2 rounded-lg flex items-center space-x-3 transition-all ${paymentMethod === 'stripe'
                           ? 'border-primary-500 bg-primary-50'
                           : 'border-gray-200 hover:border-gray-300'
-                      }`}
+                        }`}
                     >
                       <CreditCardIcon className={`w-6 h-6 ${paymentMethod === 'stripe' ? 'text-primary-600' : 'text-gray-400'}`} />
                       <div className="flex-1 text-left">
@@ -573,11 +569,10 @@ const DashboardPage = () => {
 
                     <button
                       onClick={() => setPaymentMethod('telebirr')}
-                      className={`w-full p-4 border-2 rounded-lg flex items-center space-x-3 transition-all ${
-                        paymentMethod === 'telebirr'
+                      className={`w-full p-4 border-2 rounded-lg flex items-center space-x-3 transition-all ${paymentMethod === 'telebirr'
                           ? 'border-primary-500 bg-primary-50'
                           : 'border-gray-200 hover:border-gray-300'
-                      }`}
+                        }`}
                     >
                       <DevicePhoneMobileIcon className={`w-6 h-6 ${paymentMethod === 'telebirr' ? 'text-primary-600' : 'text-gray-400'}`} />
                       <div className="flex-1 text-left">

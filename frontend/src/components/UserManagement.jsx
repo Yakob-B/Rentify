@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import toast from 'react-hot-toast'
 import { getErrorMessage } from '../utils/errors'
-import { 
-  getAllUsers, 
-  getUserAnalytics, 
-  updateUser, 
-  deleteUser, 
-  suspendUser 
+import {
+  getAllUsers,
+  getUserAnalytics,
+  updateUser,
+  deleteUser,
+  suspendUser
 } from '../utils/api'
 import {
   MagnifyingGlassIcon,
@@ -46,7 +46,7 @@ const UserManagement = () => {
     verified: 0,
     unverified: 0
   })
-  
+
   // Filters and search
   const [filters, setFilters] = useState({
     search: '',
@@ -56,7 +56,7 @@ const UserManagement = () => {
   })
   const [sortBy, setSortBy] = useState('createdAt')
   const [sortOrder, setSortOrder] = useState('desc')
-  
+
   // UI state
   const [selectedUser, setSelectedUser] = useState(null)
   const [showUserModal, setShowUserModal] = useState(false)
@@ -77,7 +77,7 @@ const UserManagement = () => {
         sortBy,
         sortOrder
       }
-      
+
       const response = await getAllUsers(params)
       setUsers(response.users)
       setPagination(response.pagination)
@@ -120,7 +120,7 @@ const UserManagement = () => {
     if (!window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
       return
     }
-    
+
     try {
       await deleteUser(userId)
       toast.success('User deleted successfully')
@@ -143,10 +143,10 @@ const UserManagement = () => {
 
   const getRoleColor = (role) => {
     switch (role) {
-      case 'admin': return 'bg-red-100 text-red-800'
-      case 'owner': return 'bg-blue-100 text-blue-800'
-      case 'renter': return 'bg-green-100 text-green-800'
-      default: return 'bg-gray-100 text-gray-800'
+      case 'admin': return 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400'
+      case 'owner': return 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400'
+      case 'renter': return 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400'
+      default: return 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-300'
     }
   }
 
@@ -176,7 +176,7 @@ const UserManagement = () => {
             </button>
           </div>
         </div>
-        
+
         {selectedUser && (
           <div className="p-6 space-y-6">
             <div className="flex items-center space-x-4">
@@ -259,18 +259,17 @@ const UserManagement = () => {
               </button>
               <button
                 onClick={() => {
-                  setSuspensionData({ 
-                    isSuspended: !selectedUser.isSuspended, 
-                    reason: selectedUser.suspensionReason || '' 
+                  setSuspensionData({
+                    isSuspended: !selectedUser.isSuspended,
+                    reason: selectedUser.suspensionReason || ''
                   })
                   setShowSuspendModal(true)
                   setShowUserModal(false)
                 }}
-                className={`flex-1 px-4 py-2 rounded-lg transition-colors ${
-                  selectedUser.isSuspended
+                className={`flex-1 px-4 py-2 rounded-lg transition-colors ${selectedUser.isSuspended
                     ? 'bg-green-600 text-white hover:bg-green-700'
                     : 'bg-yellow-600 text-white hover:bg-yellow-700'
-                }`}
+                  }`}
               >
                 {selectedUser.isSuspended ? 'Unsuspend' : 'Suspend'}
               </button>
@@ -289,7 +288,7 @@ const UserManagement = () => {
             Edit User
           </h3>
         </div>
-        
+
         <div className="p-6 space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -302,7 +301,7 @@ const UserManagement = () => {
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white"
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Email
@@ -314,7 +313,7 @@ const UserManagement = () => {
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white"
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Role
@@ -329,7 +328,7 @@ const UserManagement = () => {
               <option value="admin">Admin</option>
             </select>
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Phone
@@ -341,7 +340,7 @@ const UserManagement = () => {
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white"
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Address
@@ -353,7 +352,7 @@ const UserManagement = () => {
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white"
             />
           </div>
-          
+
           <div className="flex items-center">
             <input
               type="checkbox"
@@ -367,7 +366,7 @@ const UserManagement = () => {
             </label>
           </div>
         </div>
-        
+
         <div className="p-6 border-t border-gray-200 dark:border-gray-700 flex space-x-3">
           <button
             onClick={() => setShowEditModal(false)}
@@ -394,15 +393,15 @@ const UserManagement = () => {
             {suspensionData.isSuspended ? 'Suspend User' : 'Unsuspend User'}
           </h3>
         </div>
-        
+
         <div className="p-6 space-y-4">
           <p className="text-gray-600 dark:text-gray-400">
-            {suspensionData.isSuspended 
+            {suspensionData.isSuspended
               ? 'This will prevent the user from accessing their account.'
               : 'This will restore the user\'s access to their account.'
             }
           </p>
-          
+
           {suspensionData.isSuspended && (
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -418,7 +417,7 @@ const UserManagement = () => {
             </div>
           )}
         </div>
-        
+
         <div className="p-6 border-t border-gray-200 dark:border-gray-700 flex space-x-3">
           <button
             onClick={() => setShowSuspendModal(false)}
@@ -428,11 +427,10 @@ const UserManagement = () => {
           </button>
           <button
             onClick={handleSuspendUser}
-            className={`flex-1 px-4 py-2 rounded-lg transition-colors ${
-              suspensionData.isSuspended
+            className={`flex-1 px-4 py-2 rounded-lg transition-colors ${suspensionData.isSuspended
                 ? 'bg-red-600 text-white hover:bg-red-700'
                 : 'bg-green-600 text-white hover:bg-green-700'
-            }`}
+              }`}
           >
             {suspensionData.isSuspended ? 'Suspend User' : 'Unsuspend User'}
           </button>
@@ -509,7 +507,7 @@ const UserManagement = () => {
               />
             </div>
           </div>
-          
+
           <div className="flex gap-4">
             <select
               value={filters.role}
@@ -521,7 +519,7 @@ const UserManagement = () => {
               <option value="owner">Owner</option>
               <option value="renter">Renter</option>
             </select>
-            
+
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
@@ -532,7 +530,7 @@ const UserManagement = () => {
               <option value="email">Email</option>
               <option value="role">Role</option>
             </select>
-            
+
             <button
               onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
               className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
@@ -550,7 +548,7 @@ const UserManagement = () => {
             Users ({pagination.totalUsers})
           </h3>
         </div>
-        
+
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead className="bg-gray-50 dark:bg-gray-700">
