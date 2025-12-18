@@ -27,6 +27,7 @@ const HomePage = () => {
   const [selectedCategory, setSelectedCategory] = useState(null)
   const [loading, setLoading] = useState(true)
   const [nearbyLoading, setNearbyLoading] = useState(true)
+  const [isNearbyFallback, setIsNearbyFallback] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [location, setLocation] = useState('')
 
@@ -63,8 +64,16 @@ const HomePage = () => {
     const fetchNearby = async (coords) => {
       setNearbyLoading(true)
       try {
-        const data = await getNearbyListings({ lat: coords.lat, lng: coords.lng, distance: 10, limit: 8 })
-        setNearbyListings(data.listings || [])
+        const data = await getNearbyListings({ lat: coords.lat, lng: coords.lng, distance: 500, limit: 8 })
+        if (data.listings && data.listings.length > 0) {
+          setNearbyListings(data.listings)
+          setIsNearbyFallback(false)
+        } else {
+          // Fallback: If no nearby, fetch newest listings
+          const fallbackData = await getListings({ limit: 8, sortBy: 'createdAt', sortOrder: 'desc' })
+          setNearbyListings(fallbackData.listings || [])
+          setIsNearbyFallback(true)
+        }
       } catch (error) {
         console.error('Error fetching nearby listings:', error)
       } finally {
@@ -356,14 +365,18 @@ const HomePage = () => {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center mb-8">
               <div>
-                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Nearby Listings</h2>
-                <p className="text-lg text-gray-600 dark:text-gray-300">Based on your current location</p>
+                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                  {isNearbyFallback ? 'New Additions' : 'Nearby Listings'}
+                </h2>
+                <p className="text-lg text-gray-600 dark:text-gray-300">
+                  {isNearbyFallback ? 'Check out the latest items added to Rentify' : 'Based on your current location'}
+                </p>
               </div>
               <Link
                 to="/listings"
                 className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium flex items-center space-x-2 hover-lift group"
               >
-                <span>Explore More</span>
+                <span>{isNearbyFallback ? 'Explore All' : 'Explore More'}</span>
                 <ArrowRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
               </Link>
             </div>
