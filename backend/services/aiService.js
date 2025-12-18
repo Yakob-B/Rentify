@@ -23,8 +23,8 @@ const enhanceDescription = async (originalDescription, context = {}) => {
     }
 
     try {
-        // Get the Gemini model (using gemini-2.0-flash as the latest stable model)
-        const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+        // Using gemini-1.5-flash as it's the most stable for free-tier quotas
+        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
         // Build the prompt with context
         const prompt = buildEnhancementPrompt(originalDescription, context);
