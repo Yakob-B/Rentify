@@ -59,6 +59,18 @@ const enhanceListingDescription = async (req, res) => {
  */
 const getAIServiceStatus = async (req, res) => {
     const available = isAIServiceAvailable();
+    let models = [];
+
+    if (available) {
+        try {
+            const { GoogleGenerativeAI } = require('@google/generative-ai');
+            const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+            // Note: listing models might require specific permissions/client
+            // but we can at least try to see if we can get them or just report status
+        } catch (err) {
+            console.error('Error fetching models:', err);
+        }
+    }
 
     res.status(200).json({
         success: true,
@@ -66,8 +78,9 @@ const getAIServiceStatus = async (req, res) => {
             available,
             provider: 'Google Gemini',
             message: available
-                ? 'AI service is available'
+                ? 'AI service is configured'
                 : 'AI service is not configured. Add GEMINI_API_KEY to environment variables.',
+            help: 'If you get 404, check if the model name is correct for your region/account.'
         },
     });
 };
