@@ -9,6 +9,9 @@ const app = express();
 const { webhook } = require('./controllers/paymentController');
 const { handleTelebirrWebhook } = require('./controllers/telebirrController');
 
+// Trust proxy - required for Render and other reverse proxies
+app.set('trust proxy', 1);
+
 // CORS configuration
 const allowedOrigins = [
   'http://localhost:3000',
