@@ -65,12 +65,12 @@ const MessagesPage = () => {
       ])
       setSelectedConversation(conversationData)
       setMessages(messagesData.messages || [])
-      
+
       // Mark as read
       await markConversationAsRead(id)
-      
+
       // Update unread count in conversations list
-      setConversations(prev => prev.map(conv => 
+      setConversations(prev => prev.map(conv =>
         conv._id === id ? { ...conv, unreadCount: 0 } : conv
       ))
     } catch (error) {
@@ -88,10 +88,10 @@ const MessagesPage = () => {
       const sentMessage = await sendMessage(selectedConversation._id, newMessage)
       setMessages(prev => [...prev, sentMessage])
       setNewMessage('')
-      
+
       // Update conversation in list
-      setConversations(prev => prev.map(conv => 
-        conv._id === selectedConversation._id 
+      setConversations(prev => prev.map(conv =>
+        conv._id === selectedConversation._id
           ? { ...conv, lastMessageAt: new Date(), lastMessage: sentMessage }
           : conv
       ))
@@ -124,10 +124,10 @@ const MessagesPage = () => {
     try {
       await deleteConversation(selectedConversation._id)
       toast.success('Conversation deleted successfully')
-      
+
       // Remove conversation from list
       setConversations(prev => prev.filter(conv => conv._id !== selectedConversation._id))
-      
+
       // Clear selected conversation and navigate away
       setSelectedConversation(null)
       setMessages([])
@@ -142,8 +142,8 @@ const MessagesPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      <div className="min-h-screen bg-gray-50 dark:bg-black flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 dark:border-white"></div>
       </div>
     )
   }
@@ -173,14 +173,13 @@ const MessagesPage = () => {
                   conversations.map((conversation) => {
                     const otherUser = getOtherParticipant(conversation)
                     const isSelected = selectedConversation?._id === conversation._id
-                    
+
                     return (
                       <Link
                         key={conversation._id}
                         to={`/messages/${conversation._id}`}
-                        className={`block p-4 border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors ${
-                          isSelected ? 'bg-primary-50 dark:bg-gray-900 border-primary-200 dark:border-gray-700' : ''
-                        }`}
+                        className={`block p-4 border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors ${isSelected ? 'bg-primary-50 dark:bg-gray-900 border-primary-200 dark:border-gray-700' : ''
+                          }`}
                       >
                         <div className="flex items-center space-x-3">
                           <div className="flex-shrink-0">
@@ -191,8 +190,8 @@ const MessagesPage = () => {
                                 className="w-12 h-12 rounded-full object-cover"
                               />
                             ) : (
-                              <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
-                                <UserIcon className="w-6 h-6 text-gray-400" />
+                              <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center">
+                                <UserIcon className="w-6 h-6 text-gray-400 dark:text-gray-600" />
                               </div>
                             )}
                           </div>
@@ -218,7 +217,7 @@ const MessagesPage = () => {
                               </p>
                             )}
                             <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                              {conversation.lastMessageAt 
+                              {conversation.lastMessageAt
                                 ? new Date(conversation.lastMessageAt).toLocaleDateString()
                                 : ''}
                             </p>
@@ -260,7 +259,7 @@ const MessagesPage = () => {
                               {selectedConversation.listing && selectedConversation.listing._id && (
                                 <Link
                                   to={`/listings/${selectedConversation.listing._id}`}
-                                  className="text-sm text-primary-600 dark:text-white hover:text-primary-700 dark:hover:text-gray-300"
+                                  className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors"
                                 >
                                   View Listing: {selectedConversation.listing.title}
                                 </Link>
@@ -295,18 +294,17 @@ const MessagesPage = () => {
                             className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
                           >
                             <div
-                              className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                                isOwn
-                                  ? 'bg-primary-600 dark:bg-white text-white dark:text-black'
-                                  : 'bg-gray-200 dark:bg-gray-900 text-gray-900 dark:text-white'
-                              }`}
+                              className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${isOwn
+                                ? 'bg-primary-600 dark:bg-white text-white dark:text-black'
+                                : 'bg-gray-200 dark:bg-gray-900 text-gray-900 dark:text-white'
+                                }`}
                             >
                               {!isOwn && (
-                                <p className="text-xs font-semibold mb-1 opacity-75">
+                                <p className="text-xs font-semibold mb-1 opacity-75 dark:text-gray-300">
                                   {message.sender.name}
                                 </p>
                               )}
-                              <p className="text-sm">{message.content}</p>
+                              <p className={`text-sm ${isOwn ? 'dark:text-black' : 'dark:text-white'}`}>{message.content}</p>
                               <p className={`text-xs mt-1 ${isOwn ? 'text-primary-100 dark:text-gray-600' : 'text-gray-500 dark:text-gray-400'}`}>
                                 {new Date(message.createdAt).toLocaleTimeString([], {
                                   hour: '2-digit',
