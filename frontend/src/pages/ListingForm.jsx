@@ -120,10 +120,15 @@ const ListingForm = () => {
         categoryName = selectedCategory?.name || ''
       }
 
-      // Parse features if provided
-      const featuresArray = currentFeatures
-        ? currentFeatures.split(',').map(f => f.trim()).filter(f => f)
-        : []
+      // Parse features if provided - ensure it's a string before splitting
+      let featuresArray = []
+      if (currentFeatures) {
+        if (typeof currentFeatures === 'string') {
+          featuresArray = currentFeatures.split(',').map(f => f.trim()).filter(f => f)
+        } else if (Array.isArray(currentFeatures)) {
+          featuresArray = currentFeatures
+        }
+      }
 
       // Call AI service
       const response = await enhanceDescription({
