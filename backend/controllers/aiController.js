@@ -11,7 +11,7 @@ const enhanceListingDescription = async (req, res) => {
         if (!isAIServiceAvailable()) {
             return res.status(503).json({
                 success: false,
-                message: 'AI service is currently unavailable. Please configure GEMINI_API_KEY.',
+                message: 'AI service is currently unavailable. Please configure OPENROUTER_API_KEY.',
             });
         }
 
@@ -64,10 +64,10 @@ const getAIServiceStatus = async (req, res) => {
         success: true,
         data: {
             available,
-            provider: 'Google Gemini',
+            provider: 'OpenRouter (Free)',
             message: available
                 ? 'AI service is available'
-                : 'AI service is not configured. Add GEMINI_API_KEY to environment variables.',
+                : 'AI service is not configured. Add OPENROUTER_API_KEY to environment variables.',
         },
     });
 };
