@@ -72,6 +72,7 @@ const enhanceDescription = async (originalDescription, context = {}) => {
                 .replace(/\[\/?B_INST\]/gi, '')
                 .replace(/\[\/?INST\]/gi, '')
                 .replace(/\[\/?OUT\]/gi, '')
+                .replace(/\[\/?BOT\]/gi, '')
                 .replace(/<\/?s>/gi, '')
                 .trim();
 
