@@ -9,7 +9,7 @@ import {
   SparklesIcon
 } from '@heroicons/react/24/outline'
 import toast from 'react-hot-toast'
-import { getCategories, createListing, updateListing, getListingById, uploadListingImages, enhanceDescription } from '../utils/api'
+import { getCategories, createListing, updateListing, getListingById, uploadListingImages, enhanceDescription, generateTitle } from '../utils/api'
 import { getErrorMessage } from '../utils/errors'
 
 const ListingForm = () => {
@@ -22,6 +22,7 @@ const ListingForm = () => {
   const [images, setImages] = useState([])
   const [uploading, setUploading] = useState(false)
   const [enhancing, setEnhancing] = useState(false)
+  const [generatingTitle, setGeneratingTitle] = useState(false)
 
   const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm({
     defaultValues: {
@@ -149,6 +150,55 @@ const ListingForm = () => {
     }
   }
 
+  const handleAITitle = async () => {
+    const currentDescription = watch('description')
+    const currentCategory = watch('category')
+    const currentFeatures = watch('features')
+
+    if (!currentDescription || currentDescription.trim().length === 0) {
+      toast.error('Please enter a description first to generate a title')
+      return
+    }
+
+    try {
+      setGeneratingTitle(true)
+      toast.loading('AI is generating a title...', { id: 'ai-title' })
+
+      let categoryName = ''
+      if (currentCategory) {
+        const selectedCategory = categories.find(cat => cat._id === currentCategory)
+        categoryName = selectedCategory?.name || ''
+      }
+
+      let featuresArray = []
+      if (currentFeatures) {
+        if (typeof currentFeatures === 'string') {
+          featuresArray = currentFeatures.split(',').map(f => f.trim()).filter(f => f)
+        } else if (Array.isArray(currentFeatures)) {
+          featuresArray = currentFeatures
+        }
+      }
+
+      const response = await generateTitle({
+        description: currentDescription,
+        category: categoryName,
+        features: featuresArray
+      })
+
+      if (response.data.title) {
+        setValue('title', response.data.title)
+        toast.success('Title generated successfully!', { id: 'ai-title' })
+      } else {
+        toast.error('Could not generate a title. Please try again or type manually.', { id: 'ai-title' })
+      }
+    } catch (error) {
+      console.error('AI Title Error:', error)
+      toast.error(getErrorMessage(error, 'Failed to generate title'), { id: 'ai-title' })
+    } finally {
+      setGeneratingTitle(false)
+    }
+  }
+
   const onSubmit = async (data) => {
     setLoading(true)
 
@@ -193,9 +243,21 @@ const ListingForm = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Title *
-                </label>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Title *
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleAITitle}
+                    disabled={generatingTitle || !watch('description')}
+                    className="flex items-center space-x-1 px-3 py-1.5 text-sm font-medium text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-purple-200"
+                    title="Generate title from description"
+                  >
+                    <SparklesIcon className="w-4 h-4" />
+                    <span>{generatingTitle ? 'Generating...' : 'Magic Title'}</span>
+                  </button>
+                </div>
                 <input
                   {...register('title', { required: 'Title is required' })}
                   aria-invalid={!!errors.title}

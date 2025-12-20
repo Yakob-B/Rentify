@@ -154,6 +154,91 @@ Requirements:
 };
 
 /**
+ * Generate a short, clear rental listing title
+ * @param {string} description - The listing description
+ * @param {object} context - Additional context (category, features)
+ * @returns {Promise<string>} - Generated title
+ */
+const generateTitle = async (description, context = {}) => {
+    if (!OPENROUTER_API_KEY) return '';
+    if (!description || description.trim().length === 0) return '';
+
+    const { category, features } = context;
+    const userModel = process.env.HF_MODEL;
+    const modelsToTry = userModel && !userModel.includes('undefined')
+        ? [userModel, ...DEFAULT_FREE_MODELS]
+        : DEFAULT_FREE_MODELS;
+
+    for (const model of modelsToTry) {
+        try {
+            const systemPrompt = `You are a professional real-estate listing assistant.
+Generate a short, clear rental listing title from the description provided.
+
+Rules:
+- Maximum 10 words
+- Professional and neutral tone
+- No emojis
+- No marketing phrases (e.g., amazing, perfect, luxury)
+- No punctuation at the end
+- Use proper capitalization
+- Output ONLY the title text`;
+
+            const userPrompt = `Description:
+${description}
+
+${category ? `Category: ${category}` : ''}
+${features && features.length > 0 ? `Features: ${features.join(', ')}` : ''}
+
+Generated Title:`;
+
+            const response = await axios.post(
+                API_URL,
+                {
+                    model: model,
+                    messages: [
+                        { role: 'system', content: systemPrompt },
+                        { role: 'user', content: userPrompt }
+                    ],
+                    temperature: 0.5,
+                    max_tokens: 50
+                },
+                {
+                    headers: {
+                        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+                        'HTTP-Referer': 'http://localhost:3000',
+                        'X-Title': 'Rentify AI Title Generator',
+                        'Content-Type': 'application/json'
+                    },
+                    timeout: 15000
+                }
+            );
+
+            let title = response.data?.choices?.[0]?.message?.content || '';
+
+            // Clean up and enforce rules
+            title = title.replace(/^["']|["']$/g, '').trim();
+            if (title.endsWith('.')) title = title.slice(0, -1);
+
+            // Basic marketing filter (additional safety)
+            const marketingWords = ['amazing', 'perfect', 'luxury', 'stunning', 'incredible', 'dream'];
+            marketingWords.forEach(word => {
+                const reg = new RegExp(`\\b${word}\\b`, 'gi');
+                title = title.replace(reg, '');
+            });
+            title = title.replace(/\s+/g, ' ').trim();
+
+            if (title && title.split(' ').length <= 12) {
+                return title;
+            }
+        } catch (error) {
+            console.warn(`Model ${model} failed for title generation:`, error.message);
+            continue;
+        }
+    }
+    return '';
+};
+
+/**
  * Check if AI service is available
  */
 const isAIServiceAvailable = () => {
@@ -162,5 +247,6 @@ const isAIServiceAvailable = () => {
 
 module.exports = {
     enhanceDescription,
+    generateTitle,
     isAIServiceAvailable,
 };

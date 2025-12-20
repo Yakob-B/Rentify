@@ -1,4 +1,4 @@
-const { enhanceDescription, isAIServiceAvailable } = require('../services/aiService');
+const { enhanceDescription, generateTitle, isAIServiceAvailable } = require('../services/aiService');
 
 /**
  * @desc    Enhance listing description using AI
@@ -53,6 +53,51 @@ const enhanceListingDescription = async (req, res) => {
 };
 
 /**
+ * @desc    Generate listing title using AI
+ * @route   POST /api/ai/generate-title
+ * @access  Private
+ */
+const generateListingTitle = async (req, res) => {
+    try {
+        if (!isAIServiceAvailable()) {
+            return res.status(503).json({
+                success: false,
+                message: 'AI service is currently unavailable.',
+            });
+        }
+
+        const { description, category, features } = req.body;
+
+        if (!description || description.trim().length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Description is required to generate a title',
+            });
+        }
+
+        const context = {
+            category: category || '',
+            features: features || [],
+        };
+
+        const generatedTitle = await generateTitle(description, context);
+
+        res.status(200).json({
+            success: true,
+            data: {
+                title: generatedTitle,
+            },
+        });
+    } catch (error) {
+        console.error('Generate Title Error:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message || 'Failed to generate title',
+        });
+    }
+};
+
+/**
  * @desc    Check AI service status
  * @route   GET /api/ai/status
  * @access  Public
@@ -74,5 +119,6 @@ const getAIServiceStatus = async (req, res) => {
 
 module.exports = {
     enhanceListingDescription,
+    generateListingTitle,
     getAIServiceStatus,
 };
