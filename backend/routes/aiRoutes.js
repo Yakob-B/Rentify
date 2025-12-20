@@ -5,6 +5,7 @@ const {
     enhanceListingDescription,
     generateListingTitle,
     restructureListingFeatures,
+    extractSearchFilters,
     getAIServiceStatus,
 } = require('../controllers/aiController');
 
@@ -19,5 +20,8 @@ router.post('/generate-title', protect, generateListingTitle);
 
 // Protected route to restructure listing features
 router.post('/restructure-features', protect, restructureListingFeatures);
+
+// Public route to extract search intent (public to allow NL search for visitors)
+router.post('/extract-intent', extractSearchFilters);
 
 module.exports = router;

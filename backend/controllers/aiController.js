@@ -1,4 +1,4 @@
-const { enhanceDescription, generateTitle, restructureFeatures, isAIServiceAvailable } = require('../services/aiService');
+const { enhanceDescription, generateTitle, restructureFeatures, extractSearchIntent, isAIServiceAvailable } = require('../services/aiService');
 
 /**
  * @desc    Enhance listing description using AI
@@ -138,6 +138,51 @@ const restructureListingFeatures = async (req, res) => {
 };
 
 /**
+ * @desc    Extract search filters from natural language query
+ * @route   POST /api/ai/extract-intent
+ * @access  Public
+ */
+const extractSearchFilters = async (req, res) => {
+    try {
+        if (!isAIServiceAvailable()) {
+            return res.status(503).json({
+                success: false,
+                message: 'AI service is currently unavailable.',
+            });
+        }
+
+        const { query } = req.body;
+
+        if (!query || query.trim().length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Search query is required',
+            });
+        }
+
+        const filters = await extractSearchIntent(query);
+
+        if (!filters) {
+            return res.status(500).json({
+                success: false,
+                message: 'Failed to extract intent from query',
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            data: filters,
+        });
+    } catch (error) {
+        console.error('Extract Intent Error:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message || 'Failed to extract intent',
+        });
+    }
+};
+
+/**
  * @desc    Check AI service status
  * @route   GET /api/ai/status
  * @access  Public
@@ -161,5 +206,6 @@ module.exports = {
     enhanceListingDescription,
     generateListingTitle,
     restructureListingFeatures,
+    extractSearchFilters,
     getAIServiceStatus,
 };

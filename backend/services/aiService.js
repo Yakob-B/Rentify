@@ -309,6 +309,98 @@ Beautified Features:`;
     return featuresString; // Fallback to original
 };
 
+
+/**
+ * Extract structured search intent from natural language query
+ * @param {string} query - The user's search query
+ * @returns {Promise<object>} - structured search filters
+ */
+const extractSearchIntent = async (query) => {
+    if (!OPENROUTER_API_KEY) return null;
+    if (!query || query.trim().length === 0) return null;
+
+    const userModel = process.env.HF_MODEL;
+    const modelsToTry = userModel && !userModel.includes('undefined')
+        ? [userModel, ...DEFAULT_FREE_MODELS]
+        : DEFAULT_FREE_MODELS;
+
+    for (const model of modelsToTry) {
+        try {
+            const systemPrompt = `You are an intent extraction engine for a rental property search system.
+Your task is to extract structured search filters from a user's natural language query.
+
+Return ONLY valid JSON with the following fields:
+- bedrooms (number or null)
+- priceMin (number or null)
+- priceMax (number or null)
+- location (string or null)
+- amenities (array of strings)
+
+Rules:
+- Do NOT explain anything
+- Do NOT include extra text
+- Do NOT add extra fields
+- Use null if a value is not mentioned
+- Normalize synonyms (e.g., "2BR", "two bedroom", "2 bed" -> 2)
+- If specific location is mentioned, set it to location field.
+- If price range is "under X", priceMin is null, priceMax is X.
+- If price range is "over X", priceMin is X, priceMax is null.
+- If price range is "between X and Y", priceMin is X, priceMax is Y.
+- Extract generic amenities like "pool", "wifi", "gym", "parking", "balcony".`;
+
+            const userPrompt = `User query: "${query}"`;
+
+            const response = await axios.post(
+                API_URL,
+                {
+                    model: model,
+                    messages: [
+                        { role: 'system', content: systemPrompt },
+                        { role: 'user', content: userPrompt }
+                    ],
+                    temperature: 0.1, // Very low temperature for strict JSON output
+                    max_tokens: 500
+                },
+                {
+                    headers: {
+                        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+                        'HTTP-Referer': 'http://localhost:3000',
+                        'X-Title': 'Rentify AI Intent Exractor',
+                        'Content-Type': 'application/json'
+                    },
+                    timeout: 15000
+                }
+            );
+
+            let content = response.data?.choices?.[0]?.message?.content || '';
+
+            // Clean up content to ensure it's valid JSON
+            content = content.trim();
+            if (content.startsWith('```json')) {
+                content = content.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+            } else if (content.startsWith('```')) {
+                content = content.replace(/^```\s*/, '').replace(/\s*```$/, '');
+            }
+
+            try {
+                const parsed = JSON.parse(content);
+                // Validate structure briefly
+                if (typeof parsed === 'object' && parsed !== null) {
+                    return parsed;
+                }
+            } catch (jsonError) {
+                console.warn(`Model ${model} returned invalid JSON:`, content);
+                continue;
+            }
+
+        } catch (error) {
+            console.warn(`Model ${model} failed for intent extraction:`, error.message);
+            continue;
+        }
+    }
+    return null;
+};
+
 /**
  * Check if AI service is available
  */
@@ -320,5 +412,6 @@ module.exports = {
     enhanceDescription,
     generateTitle,
     restructureFeatures,
+    extractSearchIntent,
     isAIServiceAvailable,
 };
