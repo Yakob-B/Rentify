@@ -4,6 +4,7 @@ const { protect } = require('../middleware/authMiddleware');
 const {
     enhanceListingDescription,
     generateListingTitle,
+    restructureListingFeatures,
     getAIServiceStatus,
 } = require('../controllers/aiController');
 
@@ -15,5 +16,8 @@ router.post('/enhance-description', protect, enhanceListingDescription);
 
 // Protected route to generate listing titles
 router.post('/generate-title', protect, generateListingTitle);
+
+// Protected route to restructure listing features
+router.post('/restructure-features', protect, restructureListingFeatures);
 
 module.exports = router;

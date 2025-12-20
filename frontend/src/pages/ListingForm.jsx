@@ -9,7 +9,7 @@ import {
   SparklesIcon
 } from '@heroicons/react/24/outline'
 import toast from 'react-hot-toast'
-import { getCategories, createListing, updateListing, getListingById, uploadListingImages, enhanceDescription, generateTitle } from '../utils/api'
+import { getCategories, createListing, updateListing, getListingById, uploadListingImages, enhanceDescription, generateTitle, restructureFeatures } from '../utils/api'
 import { getErrorMessage } from '../utils/errors'
 
 const ListingForm = () => {
@@ -23,6 +23,7 @@ const ListingForm = () => {
   const [uploading, setUploading] = useState(false)
   const [enhancing, setEnhancing] = useState(false)
   const [generatingTitle, setGeneratingTitle] = useState(false)
+  const [restructuringFeatures, setRestructuringFeatures] = useState(false)
 
   const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm({
     defaultValues: {
@@ -196,6 +197,34 @@ const ListingForm = () => {
       toast.error(getErrorMessage(error, 'Failed to generate title'), { id: 'ai-title' })
     } finally {
       setGeneratingTitle(false)
+    }
+  }
+
+  const handleAIRestructure = async () => {
+    const currentFeatures = watch('features')
+
+    if (!currentFeatures || (typeof currentFeatures === 'string' && currentFeatures.trim().length === 0)) {
+      toast.error('Please enter some features first to restructure')
+      return
+    }
+
+    try {
+      setRestructuringFeatures(true)
+      toast.loading('AI is beautifying your features...', { id: 'ai-features' })
+
+      const response = await restructureFeatures({ features: currentFeatures })
+
+      if (response.data.features) {
+        setValue('features', response.data.features)
+        toast.success('Features beautified successfully!', { id: 'ai-features' })
+      } else {
+        toast.error('Could not beautify features. Please try again.', { id: 'ai-features' })
+      }
+    } catch (error) {
+      console.error('AI Features Error:', error)
+      toast.error(getErrorMessage(error, 'Failed to beautify features'), { id: 'ai-features' })
+    } finally {
+      setRestructuringFeatures(false)
     }
   }
 
@@ -507,7 +536,19 @@ const ListingForm = () => {
           </div>
 
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Features</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-900">Features</h2>
+              <button
+                type="button"
+                onClick={handleAIRestructure}
+                disabled={restructuringFeatures || !watch('features')}
+                className="flex items-center space-x-1 px-3 py-1.5 text-sm font-medium text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-purple-200"
+                title="Beautify features with AI"
+              >
+                <SparklesIcon className="w-4 h-4" />
+                <span>{restructuringFeatures ? 'Beautifying...' : 'Magic Restructure'}</span>
+              </button>
+            </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">

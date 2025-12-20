@@ -1,4 +1,4 @@
-const { enhanceDescription, generateTitle, isAIServiceAvailable } = require('../services/aiService');
+const { enhanceDescription, generateTitle, restructureFeatures, isAIServiceAvailable } = require('../services/aiService');
 
 /**
  * @desc    Enhance listing description using AI
@@ -98,6 +98,46 @@ const generateListingTitle = async (req, res) => {
 };
 
 /**
+ * @desc    Restructure listing features using AI
+ * @route   POST /api/ai/restructure-features
+ * @access  Private
+ */
+const restructureListingFeatures = async (req, res) => {
+    try {
+        if (!isAIServiceAvailable()) {
+            return res.status(503).json({
+                success: false,
+                message: 'AI service is currently unavailable.',
+            });
+        }
+
+        const { features } = req.body;
+
+        if (!features || (typeof features === 'string' && features.trim().length === 0) || (Array.isArray(features) && features.length === 0)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Features are required to restructure',
+            });
+        }
+
+        const beautifiedFeatures = await restructureFeatures(features);
+
+        res.status(200).json({
+            success: true,
+            data: {
+                features: beautifiedFeatures,
+            },
+        });
+    } catch (error) {
+        console.error('Restructure Features Error:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message || 'Failed to restructure features',
+        });
+    }
+};
+
+/**
  * @desc    Check AI service status
  * @route   GET /api/ai/status
  * @access  Public
@@ -120,5 +160,6 @@ const getAIServiceStatus = async (req, res) => {
 module.exports = {
     enhanceListingDescription,
     generateListingTitle,
+    restructureListingFeatures,
     getAIServiceStatus,
 };

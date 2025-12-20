@@ -239,6 +239,77 @@ Generated Title:`;
 };
 
 /**
+ * Restructure and beautify listing features
+ * @param {string|string[]} features - The list of features
+ * @param {object} context - Additional context
+ * @returns {Promise<string>} - Cleaned features as a comma-separated string
+ */
+const restructureFeatures = async (features, context = {}) => {
+    if (!OPENROUTER_API_KEY) return '';
+
+    // Normalize input to string
+    const featuresString = Array.isArray(features) ? features.join(', ') : features;
+    if (!featuresString || featuresString.trim().length === 0) return '';
+
+    const userModel = process.env.HF_MODEL;
+    const modelsToTry = userModel && !userModel.includes('undefined')
+        ? [userModel, ...DEFAULT_FREE_MODELS]
+        : DEFAULT_FREE_MODELS;
+
+    for (const model of modelsToTry) {
+        try {
+            const systemPrompt = `You are a professional real-estate listing assistant.
+Your task is to beautify and restructure a list of rental listing features into a clean, professional, and standardized format.
+
+Rules:
+- Standardize naming (e.g., "WiFi" instead of "wifi", "Air Conditioning" instead of "ac").
+- Clean up capitalization (Title Case).
+- Remove duplicates.
+- Do NOT add new features not present in the input.
+- Keep the meaning exactly the same.
+- Output ONLY a clean comma-separated list.`;
+
+            const userPrompt = `Input Features: ${featuresString}
+Beautified Features:`;
+
+            const response = await axios.post(
+                API_URL,
+                {
+                    model: model,
+                    messages: [
+                        { role: 'system', content: systemPrompt },
+                        { role: 'user', content: userPrompt }
+                    ],
+                    temperature: 0.3, // Lower temperature for more factual restructuring
+                    max_tokens: 200
+                },
+                {
+                    headers: {
+                        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+                        'HTTP-Referer': 'http://localhost:3000',
+                        'X-Title': 'Rentify AI Feature Beautifier',
+                        'Content-Type': 'application/json'
+                    },
+                    timeout: 15000
+                }
+            );
+
+            let cleanedFeatures = response.data?.choices?.[0]?.message?.content || '';
+            cleanedFeatures = cleanedFeatures.replace(/^["']|["']$/g, '').trim();
+            if (cleanedFeatures.endsWith('.')) cleanedFeatures = cleanedFeatures.slice(0, -1);
+
+            if (cleanedFeatures && cleanedFeatures.length > 5) {
+                return cleanedFeatures;
+            }
+        } catch (error) {
+            console.warn(`Model ${model} failed for feature restructuring:`, error.message);
+            continue;
+        }
+    }
+    return featuresString; // Fallback to original
+};
+
+/**
  * Check if AI service is available
  */
 const isAIServiceAvailable = () => {
@@ -248,5 +319,6 @@ const isAIServiceAvailable = () => {
 module.exports = {
     enhanceDescription,
     generateTitle,
+    restructureFeatures,
     isAIServiceAvailable,
 };
