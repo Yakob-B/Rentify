@@ -161,8 +161,9 @@ export const checkMultipleFavorites = (listingIds) => api.post('/favorites/check
 // AI API
 export const getAIServiceStatus = () => api.get('/ai/status')
 export const enhanceDescription = (descriptionData) => api.post('/ai/enhance-description', descriptionData)
+export const generateTitle = (titleData) => api.post('/ai/generate-title', titleData)
 export const restructureFeatures = (featuresData) => api.post('/ai/restructure-features', featuresData)
-export const extractSearchIntent = (searchData) => api.post('/ai/search-intent', searchData)
+export const extractSearchIntent = (searchData) => api.post('/ai/extract-intent', searchData)
 export const chatWithAI = (chatData) => api.post('/ai/chat', chatData)
 
 export default api

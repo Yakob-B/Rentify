@@ -16,7 +16,7 @@ import PageTransition from '../components/PageTransition'
 import useScrollAnimation from '../hooks/useScrollAnimation'
 import SEO from '../components/SEO'
 import StructuredData from '../components/StructuredData'
-import { getCategories, getListings, getNearbyListings } from '../utils/api'
+import { getCategories, getListings, getNearbyListings, extractSearchIntent } from '../utils/api'
 import toast from 'react-hot-toast'
 import { getErrorMessage } from '../utils/errors'
 
@@ -96,6 +96,41 @@ const HomePage = () => {
       fetchNearby(DEFAULT_COORDS)
     }
   }, [])
+
+  const handleMagicSearch = async () => {
+    if (!searchTerm || searchTerm.trim().length === 0) {
+      toast.error('Please enter a search query first')
+      return
+    }
+
+    const loadingToast = toast.loading('AI analyzing search intent...')
+    try {
+      const result = await extractSearchIntent({ query: searchTerm })
+      if (result.success) {
+        const filters = result.data
+        // Update local state and URL params
+        if (filters.location) setLocation(filters.location)
+
+        const params = {
+          limit: 8,
+          search: searchTerm,
+          ...(filters.location && { location: filters.location }),
+          ...(filters.priceMin && { minPrice: filters.priceMin }),
+          ...(filters.priceMax && { maxPrice: filters.priceMax }),
+        }
+
+        const data = await getListings(params)
+        setListings(data.listings || [])
+        toast.success('AI magic search applied!', { id: loadingToast })
+      } else {
+        throw new Error(result.message)
+      }
+    } catch (error) {
+      console.error('Magic Search Error:', error)
+      toast.error('AI failed to process search. Using regular search instead.', { id: loadingToast })
+      handleSearch()
+    }
+  }
 
   const handleSearch = async () => {
     setLoading(true)
@@ -215,13 +250,23 @@ const HomePage = () => {
                       className="w-full pl-10 pr-4 py-3.5 md:py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 placeholder:text-gray-400 transition-all duration-300 hover:border-primary-300"
                     />
                   </div>
-                  <button
-                    type="submit"
-                    className="bg-primary-600 hover:bg-primary-700 active:bg-primary-800 text-white px-8 py-3 rounded-lg font-medium transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 btn-magnetic"
-                  >
-                    <span>Search</span>
-                    <ArrowRightIcon className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-200" />
-                  </button>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <button
+                      type="submit"
+                      className="flex-1 bg-primary-600 hover:bg-primary-700 active:bg-primary-800 text-white px-8 py-3 rounded-lg font-medium transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 btn-magnetic"
+                    >
+                      <MagnifyingGlassIcon className="w-5 h-5" />
+                      <span>Search</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleMagicSearch}
+                      className="flex-1 bg-gradient-to-r from-purple-600 to-primary-600 hover:from-purple-700 hover:to-primary-700 text-white px-8 py-3 rounded-lg font-medium transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                    >
+                      <SparklesIcon className="w-5 h-5 animate-pulse" />
+                      <span>Magic Search</span>
+                    </button>
+                  </div>
                 </div>
               </form>
             </div>

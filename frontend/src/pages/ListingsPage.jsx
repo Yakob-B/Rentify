@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
-import { getCategories, getListings } from '../utils/api'
+import { getCategories, getListings, extractSearchIntent } from '../utils/api'
 import toast from 'react-hot-toast'
 import { getErrorMessage } from '../utils/errors'
 import ListingCard from '../components/ListingCard'
@@ -9,7 +9,8 @@ import Pagination from '../components/Pagination'
 import {
   MagnifyingGlassIcon,
   FunnelIcon,
-  XMarkIcon
+  XMarkIcon,
+  SparklesIcon
 } from '@heroicons/react/24/outline'
 
 const ListingsPage = () => {
@@ -108,6 +109,37 @@ const ListingsPage = () => {
     fetchListings()
   }, [page, category, location, search, minPrice, maxPrice, startDate, endDate, minRating, priceUnit, sortBy, sortOrder])
 
+  const handleMagicSearch = async () => {
+    if (!localSearch || localSearch.trim().length === 0) {
+      toast.error('Please enter a search query first')
+      return
+    }
+
+    const loadingToast = toast.loading('AI analyzing search intent...')
+    try {
+      const result = await extractSearchIntent({ query: localSearch })
+      if (result.success) {
+        const filters = result.data
+        const next = new URLSearchParams(searchParams)
+
+        next.set('search', localSearch)
+        if (filters.location) next.set('location', filters.location)
+        if (filters.priceMin) next.set('minPrice', String(filters.priceMin))
+        if (filters.priceMax) next.set('maxPrice', String(filters.priceMax))
+        if (filters.bedrooms) next.set('bedrooms', String(filters.bedrooms))
+
+        next.set('page', '1')
+        setSearchParams(next)
+        toast.success('AI magic filters applied!', { id: loadingToast })
+      } else {
+        throw new Error(result.message)
+      }
+    } catch (error) {
+      console.error('Magic Search Error:', error)
+      toast.error('AI failed to process search.', { id: loadingToast })
+    }
+  }
+
   const updateParam = (key, value) => {
     const next = new URLSearchParams(searchParams)
     if (value) next.set(key, value)
@@ -132,16 +164,26 @@ const ListingsPage = () => {
 
         {/* Search and Filters */}
         <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg p-4 mb-6 space-y-4">
-          {/* Main Search Bar */}
-          <div className="relative">
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
-            <input
-              type="text"
-              placeholder="Search listings by title or description..."
-              value={localSearch}
-              onChange={(e) => setLocalSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-black dark:text-white dark:placeholder-gray-500"
-            />
+          <div className="flex flex-col md:flex-row gap-2">
+            <div className="flex-grow relative">
+              <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
+              <input
+                type="text"
+                placeholder="Search listings by title or description..."
+                value={localSearch}
+                onChange={(e) => setLocalSearch(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-black dark:text-white dark:placeholder-gray-500"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={handleMagicSearch}
+              className="btn-primary bg-gradient-to-r from-purple-600 to-primary-600 border-none flex items-center justify-center space-x-2"
+              title="AI Magic Search - apply filters automatically"
+            >
+              <SparklesIcon className="w-5 h-5" />
+              <span className="md:hidden lg:inline">Magic Search</span>
+            </button>
           </div>
 
           {/* Basic Filters */}
