@@ -9,6 +9,7 @@ import PageTransition from './components/PageTransition'
 import FloatingThemeToggle from './components/FloatingThemeToggle'
 import LoadingSpinner from './components/LoadingSpinner'
 import { ThemeProvider } from './contexts/ThemeContext'
+import AIChatWidget from './components/AIChatWidget'
 
 // Lazy load pages
 const HomePage = lazy(() => import('./pages/HomePage'))
@@ -59,7 +60,7 @@ const ProtectedRoute = ({ children, roles }) => {
 function App() {
   return (
     <ThemeProvider>
-      <Router>
+      <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <div className="min-h-screen flex flex-col">
           <Navbar />
           <main className="flex-grow">
@@ -151,6 +152,7 @@ function App() {
           </main>
           <Footer />
           <FloatingThemeToggle />
+          <AIChatWidget />
           <Toaster
             position="top-right"
             toastOptions={{

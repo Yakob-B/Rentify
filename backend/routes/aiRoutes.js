@@ -6,6 +6,7 @@ const {
     generateListingTitle,
     restructureListingFeatures,
     extractSearchFilters,
+    chat,
     getAIServiceStatus,
 } = require('../controllers/aiController');
 
@@ -23,5 +24,8 @@ router.post('/restructure-features', protect, restructureListingFeatures);
 
 // Public route to extract search intent (public to allow NL search for visitors)
 router.post('/extract-intent', extractSearchFilters);
+
+// Protected route for AI chat
+router.post('/chat', protect, chat);
 
 module.exports = router;

@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Frontend for Rentify - Universal Rent Service Platform",
   "private": true,
+  "type": "module",
   "dependencies": {
     "@heroicons/react": "^2.0.18",
     "axios": "^1.5.0",

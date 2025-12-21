@@ -3,10 +3,13 @@ const axios = require('axios');
 // OpenRouter Configuration
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 const DEFAULT_FREE_MODELS = [
+    'meta-llama/llama-3.1-8b-instruct:free',
     'google/gemma-2-9b-it:free',
     'mistralai/mistral-7b-instruct:free',
     'microsoft/phi-3-mini-128k-instruct:free',
-    'openchat/openchat-7b:free'
+    'openchat/openchat-7b:free',
+    'gryphe/mythomist-7b:free',
+    'undi95/toppy-m-7b:free'
 ];
 const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
@@ -73,7 +76,9 @@ const enhanceDescription = async (originalDescription, context = {}) => {
                 .replace(/\[\/?INST\]/gi, '')
                 .replace(/\[\/?OUT\]/gi, '')
                 .replace(/\[\/?BOT\]/gi, '')
-                .replace(/<\/?s>/gi, '')
+                .replace(/\[\/?SYS\]/gi, '')
+                .replace(/<[^>]+>/g, '')      // Remove any <XML-style> tags
+                .replace(/^["']|["']$/g, '')    // Remove surrounding quotes
                 .trim();
 
             if (enhancedText && enhancedText.length > 20) {
@@ -402,6 +407,122 @@ Rules:
 };
 
 /**
+ * Chat with AI Assistant
+ * @param {string} message - User's last message
+ * @param {string} mode - "listing" or "platform"
+ * @param {object} contextData - Context JSON for the mode
+ * @returns {Promise<string>} - AI response
+ */
+const chatWithAI = async (message, mode, contextData) => {
+    if (!OPENROUTER_API_KEY) return 'AI service is currently unavailable.';
+
+    const userModel = process.env.HF_MODEL;
+    const modelsToTry = userModel && !userModel.includes('undefined')
+        ? [userModel, ...DEFAULT_FREE_MODELS]
+        : DEFAULT_FREE_MODELS;
+
+    // Stringify context safely
+    let contextString = '{}';
+    try {
+        contextString = JSON.stringify(contextData, null, 2);
+    } catch (e) { }
+
+    const systemPrompt = `You are Rentify Assistant, an AI chatbot for a rental platform.
+
+You will receive:
+- A mode ("listing" or "platform")
+- Context data (JSON)
+- A user message
+
+Your behavior depends strictly on the mode.
+
+--------------------------------
+MODE: "listing"
+--------------------------------
+You MUST answer using ONLY the provided listing context.
+
+Rules:
+- Do NOT guess or assume information
+- Do NOT invent prices, availability, or features
+- If the answer is NOT present in the listing context, respond EXACTLY with:
+  "I’m not sure about that. Please contact the owner for more details."
+- Keep responses short, clear, and factual
+- Do NOT mention AI, prompts, or internal data
+
+--------------------------------
+MODE: "platform"
+--------------------------------
+You may answer questions ONLY using the provided platform context.
+
+Rules:
+- Do NOT guess how Rentify works
+- Do NOT assume features, roles, or flows
+- If the answer is not present in the context, respond EXACTLY with:
+  "I don’t have enough information to answer that. Please check Rentify’s official pages or contact support."
+- Keep responses short and factual
+- Do NOT invent steps or features
+
+--------------------------------`;
+
+    const userContent = `Mode: ${mode}
+
+Context (JSON):
+${contextString}
+
+User message:
+${message}`;
+
+    for (const model of modelsToTry) {
+        try {
+            const response = await axios.post(
+                API_URL,
+                {
+                    model: model,
+                    messages: [
+                        { role: 'system', content: systemPrompt },
+                        { role: 'user', content: userContent }
+                    ],
+                    temperature: 0.3, // Low temperature for strict adherence
+                    max_tokens: 250
+                },
+                {
+                    headers: {
+                        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+                        'HTTP-Referer': 'http://localhost:3000',
+                        'X-Title': 'Rentify AI Chatbot',
+                        'Content-Type': 'application/json'
+                    },
+                    timeout: 20000
+                }
+            );
+
+            let reply = response.data?.choices?.[0]?.message?.content || '';
+            reply = reply.trim();
+
+            // Basic cleanup of common model artifacts
+            reply = reply
+                .replace(/^["']|["']$/g, '') // Remove surrounding quotes
+                .replace(/<[^>]+>/g, '')      // Remove any <XML-style> tags like <s>, <e>, etc.
+                .replace(/\[\/?INST\]/gi, '') // Remove [INST] and [/INST]
+                .replace(/\[\/?s\]/gi, '')    // Remove tokens like [/s]
+                .replace(/\[\/?OUT\]/gi, '')  // Remove instruction markers
+                .replace(/\[\/?SYS\]/gi, '')  // Remove [SYS] markers
+                .trim();
+
+            if (reply && reply.length > 2) {
+                return reply;
+            }
+        } catch (error) {
+            console.warn(`Model ${model} failed for chat:`, error.message);
+            continue;
+        }
+    }
+
+    // Fallback if all models fail
+    return "I'm having trouble connecting right now. Please try again later.";
+};
+
+/**
  * Check if AI service is available
  */
 const isAIServiceAvailable = () => {
@@ -413,5 +534,6 @@ module.exports = {
     generateTitle,
     restructureFeatures,
     extractSearchIntent,
+    chatWithAI,
     isAIServiceAvailable,
 };

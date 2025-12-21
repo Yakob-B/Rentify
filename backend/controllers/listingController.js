@@ -136,8 +136,6 @@ const getNearbyListings = async (req, res) => {
     const listings = await Listing.find({
       status: 'active',
       geo: {
-        $exists: true,
-        $ne: null,
         $near: {
           $geometry: { type: 'Point', coordinates: [longitude, latitude] },
           $maxDistance: maxDistanceMeters
